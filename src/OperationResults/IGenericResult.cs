@@ -4,7 +4,7 @@ public interface IGenericResult
 {
     bool Success { get; }
 
-    FailureReason FailureReason { get; }
+    int FailureReason { get; }
 
     Exception? Error { get; }
 

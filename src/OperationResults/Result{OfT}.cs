@@ -6,7 +6,7 @@ public class Result<T> : IGenericResult<T>
 
     public T? Content { get; }
 
-    public FailureReason FailureReason { get; }
+    public int FailureReason { get; }
 
     public Exception? Error { get; }
 
@@ -18,7 +18,7 @@ public class Result<T> : IGenericResult<T>
 
     public IEnumerable<ValidationError>? ValidationErrors { get; }
 
-    internal Result(bool success = true, T? content = default, FailureReason failureReason = FailureReason.None, string? message = null, string? detail = null, Exception? error = null, IEnumerable<ValidationError>? validationErrors = null)
+    internal Result(bool success = true, T? content = default, int failureReason = FailureReasons.None, string? message = null, string? detail = null, Exception? error = null, IEnumerable<ValidationError>? validationErrors = null)
     {
         Success = success;
         Content = content;
@@ -32,34 +32,34 @@ public class Result<T> : IGenericResult<T>
     public static Result<T> Ok(T? content = default)
         => new(success: true, content);
 
-    public static Result<T> Fail(FailureReason failureReason, ValidationError validationError)
+    public static Result<T> Fail(int failureReason, ValidationError validationError)
         => new(false, failureReason: failureReason, validationErrors: new ValidationError[] { validationError });
 
-    public static Result<T> Fail(FailureReason failureReason, string message, ValidationError validationError)
+    public static Result<T> Fail(int failureReason, string message, ValidationError validationError)
         => new(false, failureReason: failureReason, message: message, validationErrors: new ValidationError[] { validationError });
 
-    public static Result<T> Fail(FailureReason failureReason, string message, string detail, ValidationError validationError)
+    public static Result<T> Fail(int failureReason, string message, string detail, ValidationError validationError)
         => new(false, failureReason: failureReason, message: message, detail: detail, validationErrors: new ValidationError[] { validationError });
 
-    public static Result<T> Fail(FailureReason failureReason, T content, ValidationError validationError)
+    public static Result<T> Fail(int failureReason, T content, ValidationError validationError)
         => new(false, failureReason: failureReason, content: content, validationErrors: new ValidationError[] { validationError });
 
-    public static Result<T> Fail(FailureReason failureReason, Exception error, ValidationError validationError)
+    public static Result<T> Fail(int failureReason, Exception error, ValidationError validationError)
         => new(false, failureReason: failureReason, error: error, validationErrors: new ValidationError[] { validationError });
 
-    public static Result<T> Fail(FailureReason failureReason, IEnumerable<ValidationError>? validationErrors = null)
+    public static Result<T> Fail(int failureReason, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, validationErrors: validationErrors);
 
-    public static Result<T> Fail(FailureReason failureReason, string message, IEnumerable<ValidationError>? validationErrors = null)
+    public static Result<T> Fail(int failureReason, string message, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, message: message, validationErrors: validationErrors);
 
-    public static Result<T> Fail(FailureReason failureReason, string message, string detail, IEnumerable<ValidationError>? validationErrors = null)
+    public static Result<T> Fail(int failureReason, string message, string detail, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, message: message, detail: detail, validationErrors: validationErrors);
 
-    public static Result<T> Fail(FailureReason failureReason, T content, IEnumerable<ValidationError>? validationErrors = null)
+    public static Result<T> Fail(int failureReason, T content, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, content: content, validationErrors: validationErrors);
 
-    public static Result<T> Fail(FailureReason failureReason, Exception error, IEnumerable<ValidationError>? validationErrors = null)
+    public static Result<T> Fail(int failureReason, Exception error, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, error: error, validationErrors: validationErrors);
 
     public static implicit operator Result<T>(T value)
