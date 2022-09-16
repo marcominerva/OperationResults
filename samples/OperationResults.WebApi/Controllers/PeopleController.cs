@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using OperationResults.AspNetCore;
 using OperationResults.WebApi.Services;
 
 namespace OperationResults.WebApi.Controllers;
@@ -19,6 +20,7 @@ public class PeopleController : ControllerBase
     {
         var result = await peopleService.GetAsync(queryText);
 
-        return Ok(result);
+        var response = HttpContext.CreateResponse(result, StatusCodes.Status202Accepted);
+        return response;
     }
 }

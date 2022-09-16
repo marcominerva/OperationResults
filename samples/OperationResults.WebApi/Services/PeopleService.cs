@@ -7,9 +7,9 @@ public class PeopleService
     public async Task<Result<IEnumerable<Person>>> GetAsync(string queryText)
     {
         await Task.Delay(100);
-        var people = new List<Person>();
+        _ = new List<Person>();
 
-        return people;
+        return Result.Fail(FailureReasons.DatabaseError);
     }
 
     public async Task<Result<Person>> GetAsync(Guid id)
