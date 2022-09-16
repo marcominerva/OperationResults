@@ -12,7 +12,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{40EA0531-BCD9-4D33-9114-D1BB9EA7DDBA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperationResults.WebApi", "samples\OperationResults.WebApi\OperationResults.WebApi.csproj", "{11C60254-4212-42ED-ACDF-CAC830E8BEB8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OperationResults.WebApi", "samples\OperationResults.WebApi\OperationResults.WebApi.csproj", "{11C60254-4212-42ED-ACDF-CAC830E8BEB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperationResults.AspNetCore", "src\OperationResults.AspNetCore\OperationResults.AspNetCore.csproj", "{375F6E50-F06A-4832-A712-D2C7A195DE64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +30,10 @@ Global
 		{11C60254-4212-42ED-ACDF-CAC830E8BEB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11C60254-4212-42ED-ACDF-CAC830E8BEB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11C60254-4212-42ED-ACDF-CAC830E8BEB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{375F6E50-F06A-4832-A712-D2C7A195DE64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{375F6E50-F06A-4832-A712-D2C7A195DE64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{375F6E50-F06A-4832-A712-D2C7A195DE64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{375F6E50-F06A-4832-A712-D2C7A195DE64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
