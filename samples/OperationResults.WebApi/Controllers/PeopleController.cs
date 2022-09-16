@@ -20,7 +20,7 @@ public class PeopleController : ControllerBase
     {
         var result = await peopleService.GetAsync(queryText);
 
-        var response = HttpContext.CreateResponse(result, StatusCodes.Status202Accepted);
+        var response = HttpContext.CreateResponse(result);
         return response;
     }
 }

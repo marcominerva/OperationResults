@@ -4,6 +4,8 @@ namespace OperationResults.AspNetCore;
 
 public class OperationResultOptions
 {
+    public ErrorResponseFormat ErrorResponseFormat { get; set; }
+
     public Dictionary<int, int> StatusCodesMapping { get; set; }
 
     public OperationResultOptions()

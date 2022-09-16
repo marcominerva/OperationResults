@@ -96,7 +96,17 @@ public static class ControllerExtensions
         problemDetails.Extensions.Add("traceId", Activity.Current?.Id ?? httpContext.TraceIdentifier);
         if (validationErrors?.Any() ?? false)
         {
-            problemDetails.Extensions.Add("errors", validationErrors);
+            var options = httpContext.RequestServices.GetRequiredService<OperationResultOptions>();
+
+            if (options.ErrorResponseFormat == ErrorResponseFormat.Default)
+            {
+                var errors = validationErrors.GroupBy(v => v.Name).ToDictionary(k => k.Key, v => v.Select(e => e.Message));
+                problemDetails.Extensions.Add("errors", errors);
+            }
+            else
+            {
+                problemDetails.Extensions.Add("errors", validationErrors);
+            }
         }
 
         var problemDetailsResults = new ObjectResult(problemDetails)
