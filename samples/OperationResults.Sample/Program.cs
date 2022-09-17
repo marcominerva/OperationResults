@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OperationResults.AspNetCore;
+using OperationResults.Sample.BusinessLayer;
 using OperationResults.Sample.BusinessLayer.Services;
 using OperationResults.Sample.BusinessLayer.Services.Interfaces;
 using OperationResults.Sample.DataAccessLayer;
@@ -21,6 +22,11 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddOperationResult(options =>
 {
     options.ErrorResponseFormat = ErrorResponseFormat.Default;
+
+    // Adds a custom mapping between CustomFailureReasons.NotAvailable (1001) and the 501 HTTP Status Code.
+    // Adding new mappings or editing the existing ones allows to define what HTTP Status Codes the API must return
+    // for the Operation Results of our Business Logic methods.
+    options.StatusCodesMapping.Add(CustomFailureReasons.NotAvailable, StatusCodes.Status501NotImplemented);
 },
 updateModelStateResponseFactory: true,
 validationErrorDefaultMessage: "Errors occurred");

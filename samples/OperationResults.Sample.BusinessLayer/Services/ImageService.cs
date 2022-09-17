@@ -6,12 +6,12 @@ public class ImageService : IImageService
 {
     public async Task<Result<ByteArrayFileContent>> GetImageAsync()
     {
-        if (!File.Exists(@"D:\Image.jpg"))
+        if (!File.Exists(@"D:\Taggia.jpg"))
         {
             return Result.Fail(FailureReasons.ItemNotFound);
         }
 
-        var content = await File.ReadAllBytesAsync(@"D:\Image.jpg");
+        var content = await File.ReadAllBytesAsync(@"D:\Taggia.jpg");
         return new ByteArrayFileContent(content, "image/jpg");
     }
 }

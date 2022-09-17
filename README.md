@@ -24,6 +24,8 @@ The library is available on [NuGet](https://www.nuget.org/packages/OperationResu
 
 This library provides HttpContext extensions to automatically map Operation Results (that may come, for example, from a business layer) to HTTP responses, along with the appropriate status codes.
 
+A full example is available in the [Samples](https://github.com/marcominerva/OperationResults/tree/master/samples) folder. Search for the registration in the [Program.cs](https://github.com/marcominerva/OperationResults/blob/master/samples/OperationResults.Sample/Program.cs#L22) file and the usage in [Controllers](https://github.com/marcominerva/OperationResults/tree/master/samples/OperationResults.Sample/Controllers).
+
 **Installation**
 
 The library is available on [NuGet](https://www.nuget.org/packages/OperationResultTools.AspNetCore). Just search *OperationResultTools.AspNetCore* in the **Package Manager GUI** or run the following command in the **Package Manager Console**:
