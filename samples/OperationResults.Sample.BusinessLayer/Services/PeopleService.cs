@@ -24,6 +24,7 @@ public class PeopleService : IPeopleService
                 Id = p.Id,
                 FirstName = p.FirstName,
                 LastName = p.LastName,
+                Email = p.Email,
                 City = p.City
             })
             .ToListAsync();
@@ -44,6 +45,7 @@ public class PeopleService : IPeopleService
             Id = dbPerson.Id,
             FirstName = dbPerson.FirstName,
             LastName = dbPerson.LastName,
+            Email = dbPerson.Email,
             City = dbPerson.City
         };
 
@@ -82,6 +84,7 @@ public class PeopleService : IPeopleService
 
         dbPerson.FirstName = person.FirstName;
         dbPerson.LastName = person.LastName;
+        dbPerson.Email = person.Email;
         dbPerson.City = person.City;
 
         await dbContext.SaveAsync();

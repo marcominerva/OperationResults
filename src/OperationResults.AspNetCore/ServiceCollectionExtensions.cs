@@ -44,7 +44,7 @@ public static class ServiceCollectionExtensions
                     {
                         var errors = actionContext.ModelState
                             .Where(e => e.Value?.Errors.Any() ?? false)
-                            .Select(e => new ValidationError(e.Key, e.Value!.Errors.First().ErrorMessage));
+                            .SelectMany(e => e.Value!.Errors.Select(v => new ValidationError(e.Key, v.ErrorMessage)));
 
                         problemDetails.Extensions.Add("errors", errors);
                     }

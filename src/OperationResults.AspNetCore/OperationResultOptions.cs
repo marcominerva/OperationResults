@@ -6,7 +6,9 @@ public class OperationResultOptions
 {
     public ErrorResponseFormat ErrorResponseFormat { get; set; }
 
-    public Dictionary<int, int> StatusCodesMapping { get; set; }
+    public Dictionary<int, int> StatusCodesMapping { get; }
+
+    public string? RouteVersionParameterName { get; set; }
 
     public OperationResultOptions()
     {
