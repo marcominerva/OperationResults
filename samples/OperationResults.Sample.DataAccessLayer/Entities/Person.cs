@@ -1,4 +1,4 @@
-﻿namespace OperationResults.WebApi.Models;
+﻿namespace OperationResults.Sample.DataAccessLayer.Entities;
 
 public class Person
 {
@@ -9,4 +9,6 @@ public class Person
     public string LastName { get; set; }
 
     public string City { get; set; }
+
+    public DateTime CreateDate { get; set; }
 }
