@@ -9,7 +9,7 @@ A set of lightweight libraries to totally decouple operation results and actual 
 ## Core library
 
 [![NuGet](https://img.shields.io/nuget/v/OperationResultTools.svg?style=flat-square)](https://www.nuget.org/packages/OperationResultTools)
-[![Nuget](https://img.shields.io/nuget/dt/OperationResulTools)](https://www.nuget.org/packages/OperationResultTools)
+[![Nuget](https://img.shields.io/nuget/dt/OperationResultTools)](https://www.nuget.org/packages/OperationResultTools)
 
 **Installation**
 
@@ -20,7 +20,7 @@ The library is available on [NuGet](https://www.nuget.org/packages/OperationResu
 ## ASP.NET Core integration library
 
 [![NuGet](https://img.shields.io/nuget/v/OperationResultTools.AspNetCore.svg?style=flat-square)](https://www.nuget.org/packages/OperationResultTools.AspNetCore)
-[![Nuget](https://img.shields.io/nuget/dt/OperationResulTools.AspNetCore)](https://www.nuget.org/packages/OperationResultTools.AspNetCore)
+[![Nuget](https://img.shields.io/nuget/dt/OperationResultTools.AspNetCore)](https://www.nuget.org/packages/OperationResultTools.AspNetCore)
 
 This library provides HttpContext extensions to automatically map Operation Results (that may come, for example, from a business layer) to HTTP responses, along with the appropriate status codes.
 
