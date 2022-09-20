@@ -8,8 +8,6 @@ public class OperationResultOptions
 
     public Dictionary<int, int> StatusCodesMapping { get; }
 
-    public string? RouteVersionParameterName { get; set; }
-
     public OperationResultOptions()
     {
         StatusCodesMapping = new Dictionary<int, int>

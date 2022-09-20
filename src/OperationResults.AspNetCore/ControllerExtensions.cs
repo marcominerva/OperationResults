@@ -32,16 +32,6 @@ public static class ControllerExtensions
                 {
                     var routeValueDictionary = new RouteValueDictionary(routeValues);
 
-                    var options = httpContext.RequestServices.GetRequiredService<OperationResultOptions>();
-                    if (!string.IsNullOrWhiteSpace(options.RouteVersionParameterName))
-                    {
-                        var apiVersion = httpContext.GetRequestedApiVersion();
-                        if (apiVersion is not null && !routeValueDictionary.ContainsKey(options.RouteVersionParameterName))
-                        {
-                            routeValueDictionary.Add(options.RouteVersionParameterName, apiVersion.ToString());
-                        }
-                    }
-
                     var createdAtRouteResult = new CreatedAtRouteResult(routeName, routeValueDictionary, result.Content)
                     {
                         StatusCode = responseStatusCode.GetValueOrDefault(StatusCodes.Status201Created)
