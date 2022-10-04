@@ -7,22 +7,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OperationResults.AspNetCore;
 
-public static class ControllerExtensions
+public static class HttpContextExtensions
 {
-    public static IActionResult CreateResponse(this HttpContext httpContext, Result result, int? responseStatusCode = null)
+    public static IActionResult CreateResponse(this HttpContext httpContext, Result result, int? successStatusCode = null)
     {
         if (result.Success)
         {
-            return new StatusCodeResult(responseStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent));
+            return new StatusCodeResult(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent));
         }
 
         return Problem(httpContext, FailureReasonToStatusCode(httpContext, result.FailureReason), null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
     }
 
-    public static IActionResult CreateResponse<T>(this HttpContext httpContext, Result<T> result, int? responseStatusCode = null)
-        => CreateResponse(httpContext, result, null, null, responseStatusCode);
+    public static IActionResult CreateResponse<T>(this HttpContext httpContext, Result<T> result, int? successStatusCode = null)
+        => CreateResponse(httpContext, result, null, null, successStatusCode);
 
-    public static IActionResult CreateResponse<T>(this HttpContext httpContext, Result<T> result, string? routeName, object? routeValues = null, int? responseStatusCode = null)
+    public static IActionResult CreateResponse<T>(this HttpContext httpContext, Result<T> result, string? routeName, object? routeValues = null, int? successStatusCode = null)
     {
         if (result.Success)
         {
@@ -34,7 +34,7 @@ public static class ControllerExtensions
 
                     var createdAtRouteResult = new CreatedAtRouteResult(routeName, routeValueDictionary, result.Content)
                     {
-                        StatusCode = responseStatusCode.GetValueOrDefault(StatusCodes.Status201Created)
+                        StatusCode = successStatusCode.GetValueOrDefault(StatusCodes.Status201Created)
                     };
 
                     return createdAtRouteResult;
@@ -60,13 +60,13 @@ public static class ControllerExtensions
 
                 var okResult = new ObjectResult(result.Content)
                 {
-                    StatusCode = responseStatusCode.GetValueOrDefault(StatusCodes.Status200OK)
+                    StatusCode = successStatusCode.GetValueOrDefault(StatusCodes.Status200OK)
                 };
 
                 return okResult;
             }
 
-            return new StatusCodeResult(responseStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent));
+            return new StatusCodeResult(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent));
         }
 
         return Problem(httpContext, FailureReasonToStatusCode(httpContext, result.FailureReason), result.Content, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
