@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -21,7 +22,7 @@ public static class ServiceCollectionExtensions
                 options.InvalidModelStateResponseFactory = actionContext =>
                 {
                     var httpContext = actionContext.HttpContext;
-                    var statusCode = operationResultOptions.GetStatusCode(FailureReasons.ClientError);
+                    var statusCode = operationResultOptions.GetStatusCode(FailureReasons.ClientError, StatusCodes.Status400BadRequest);
                     var problemDetails = new ProblemDetails
                     {
                         Status = statusCode,
