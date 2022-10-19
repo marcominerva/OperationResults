@@ -68,10 +68,10 @@ public class PeopleService : IPeopleService
                 var validationErrors = new List<ValidationError>
                 {
                     new("FirstName", "First name already in use"),
-                    new ("LastName", "Last name already in use")
+                    new("LastName", "Last name already in use")
                 };
 
-                return Result.Fail(FailureReasons.ClientError, "Unable to create a person with same first name and surname within 1 minute", validationErrors);
+                return Result.Fail(FailureReasons.ClientError, "Unable to create a person with same first name and last name within 1 minute", validationErrors);
             }
 
             dbPerson = new Entities.Person
@@ -79,7 +79,7 @@ public class PeopleService : IPeopleService
                 CreateDate = DateTime.UtcNow
             };
 
-            dbContext.Insert(dbPerson);
+            dbContext.Add(dbPerson);
         }
 
         dbPerson.FirstName = person.FirstName;
@@ -87,7 +87,7 @@ public class PeopleService : IPeopleService
         dbPerson.Email = person.Email;
         dbPerson.City = person.City;
 
-        await dbContext.SaveAsync();
+        await dbContext.SaveChangesAsync();
         person.Id = dbPerson.Id;
 
         return person;
@@ -104,8 +104,8 @@ public class PeopleService : IPeopleService
                 return Result.Fail(FailureReasons.Forbidden, "You cannot delete the Admin user");
             }
 
-            dbContext.Delete(dbPerson);
-            await dbContext.SaveAsync();
+            dbContext.Remove(dbPerson);
+            await dbContext.SaveChangesAsync();
 
             return Result.Ok();
         }
