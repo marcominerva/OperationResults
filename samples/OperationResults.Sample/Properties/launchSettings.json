@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "OperationResults.WebApi": {
+    "OperationResults.Sample": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
