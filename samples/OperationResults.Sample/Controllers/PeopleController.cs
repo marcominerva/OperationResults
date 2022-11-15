@@ -25,7 +25,7 @@ public class PeopleController : ControllerBase
         // You can collapse the following instructions into a single one.
         var result = await peopleService.GetAsync();
 
-        var response = HttpContext.CreateResponse(result);
+        var response = HttpContext.CreateResponse(result);  // Or result.ToResponse(HttpContext)
         return response;
     }
 
@@ -37,7 +37,7 @@ public class PeopleController : ControllerBase
         // You can collapse the following instructions into a single one.
         var result = await peopleService.GetAsync(id);
 
-        var response = HttpContext.CreateResponse(result);
+        var response = HttpContext.CreateResponse(result);  // Or result.ToResponse(HttpContext)
         return response;
     }
 
@@ -49,7 +49,7 @@ public class PeopleController : ControllerBase
         // You can collapse the following instructions into a single one.
         var result = await peopleService.SaveAsync(person);
 
-        var response = HttpContext.CreateResponse(result, nameof(GetPerson), new { id = result.Content?.Id });
+        var response = HttpContext.CreateResponse(result, nameof(GetPerson), new { id = result.Content?.Id });  // Or result.ToResponse(HttpContext, nameof(GetPerson), new { id = result.Content?.Id });
         return response;
     }
 
@@ -62,7 +62,7 @@ public class PeopleController : ControllerBase
         // You can collapse the following instructions into a single one.
         var result = await peopleService.DeleteAsync(id);
 
-        var response = HttpContext.CreateResponse(result);
+        var response = HttpContext.CreateResponse(result);  // Or result.ToResponse(HttpContext)
         return response;
     }
 }
