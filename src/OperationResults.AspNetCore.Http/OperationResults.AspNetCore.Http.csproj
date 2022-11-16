@@ -13,7 +13,7 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/marcominerva/OperationResults</PackageProjectUrl>
         <PackageIcon>Toolbox.png</PackageIcon>
-        <PackageTags>csharp visual-studio net minimal-api desktop web mobile utilities helpers</PackageTags>
+        <PackageTags>csharp visual-studio net minimal-api web mobile utilities helpers</PackageTags>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/marcominerva/OperationResults.git</RepositoryUrl>
         <RepositoryBranch>master</RepositoryBranch>
