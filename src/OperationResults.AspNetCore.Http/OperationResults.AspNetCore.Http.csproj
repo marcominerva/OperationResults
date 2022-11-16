@@ -6,14 +6,14 @@
         <Nullable>enable</Nullable>
         <Authors>Marco Minerva</Authors>
         <Company>Marco Minerva</Company>
-        <Product>OperationResults.MinimalApi</Product>
-        <Title>OperationResults.MinimalApi</Title>
+        <Product>OperationResultTools.AspNetCore.Http</Product>
+        <Title>OperationResultTools.AspNetCore.Http</Title>
         <Description>A lightweight library to totally decouple operation results and responses in Minimal API projects.</Description>
-        <PackageId>OperationResultTools.MinimalApi</PackageId>
+        <PackageId>OperationResultTools.AspNetCore.Http</PackageId>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/marcominerva/OperationResults</PackageProjectUrl>
         <PackageIcon>Toolbox.png</PackageIcon>
-        <PackageTags>csharp visual-studio net minimal-pi desktop web mobile utilities helpers</PackageTags>
+        <PackageTags>csharp visual-studio net minimal-api desktop web mobile utilities helpers</PackageTags>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/marcominerva/OperationResults.git</RepositoryUrl>
         <RepositoryBranch>master</RepositoryBranch>

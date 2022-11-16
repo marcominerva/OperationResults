@@ -1,3 +1,5 @@
+using System.Net.Mime;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OperationResults.AspNetCore.Http;
 using OperationResults.Sample.BusinessLayer;
@@ -53,6 +55,7 @@ peopleApi.MapGet("/", async (IPeopleService peopleService, HttpContext httpConte
     var response = httpContext.CreateResponse(result);  // Or result.ToResponse(HttpContext)
     return response;
 })
+.Produces<IEnumerable<Person>>()
 .WithOpenApi();
 
 peopleApi.MapGet("{id:guid}", async (Guid id, IPeopleService peopleService, HttpContext httpContext) =>
@@ -63,6 +66,8 @@ peopleApi.MapGet("{id:guid}", async (Guid id, IPeopleService peopleService, Http
     var response = httpContext.CreateResponse(result);  // Or result.ToResponse(HttpContext)
     return response;
 })
+.Produces<Person>()
+.Produces(StatusCodes.Status404NotFound)
 .WithName("GetPerson")
 .WithOpenApi();
 
@@ -74,6 +79,8 @@ peopleApi.MapPost("/", async (Person person, IPeopleService peopleService, HttpC
     var response = httpContext.CreateResponse(result, "GetPerson", new { id = result.Content?.Id });  // Or result.ToResponse(HttpContext, nameof(GetPerson), new { id = result.Content?.Id });
     return response;
 })
+.Produces<Person>(StatusCodes.Status201Created)
+.ProducesProblem(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
 .WithOpenApi();
 
 peopleApi.MapDelete("{id:guid}", async (Guid id, IPeopleService peopleService, HttpContext httpContext) =>
@@ -84,11 +91,15 @@ peopleApi.MapDelete("{id:guid}", async (Guid id, IPeopleService peopleService, H
     var response = httpContext.CreateResponse(result);  // Or result.ToResponse(HttpContext)
     return response;
 })
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
 
 app.MapGet("api/image", async (IImageService imageService, HttpContext httpContext)
     => httpContext.CreateResponse(await imageService.GetImageAsync())
 )
+.Produces<FileContentResult>(StatusCodes.Status200OK, contentType: MediaTypeNames.Application.Octet)
+.Produces(StatusCodes.Status404NotFound)
 .WithOpenApi();
 
 app.Run();
