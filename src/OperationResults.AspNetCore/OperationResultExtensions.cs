@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,9 +29,7 @@ public static class OperationResultExtensions
             {
                 if (!string.IsNullOrWhiteSpace(routeName))
                 {
-                    var routeValueDictionary = new RouteValueDictionary(routeValues);
-
-                    var createdAtRouteResult = new CreatedAtRouteResult(routeName, routeValueDictionary, result.Content)
+                    var createdAtRouteResult = new CreatedAtRouteResult(routeName, routeValues, result.Content)
                     {
                         StatusCode = successStatusCode.GetValueOrDefault(StatusCodes.Status201Created)
                     };
