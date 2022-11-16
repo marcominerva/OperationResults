@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -8,7 +9,19 @@ namespace OperationResults.AspNetCore;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration = null, bool updateModelStateResponseFactory = false, string? validationErrorDefaultMessage = null)
+    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration = null)
+        => services.AddOperationResult(configuration, false, (modelState) => null);
+
+    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration = null, bool updateModelStateResponseFactory = false)
+        => services.AddOperationResult(configuration, updateModelStateResponseFactory, (modelState) => null);
+
+    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration = null, string? validationErrorDefaultMessage = null)
+        => services.AddOperationResult(configuration, true, (modelState) => validationErrorDefaultMessage);
+
+    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration = null, Func<ModelStateDictionary, string?>? validationErrorMessageProvider = null)
+        => services.AddOperationResult(configuration, true, validationErrorMessageProvider);
+
+    private static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration, bool updateModelStateResponseFactory, Func<ModelStateDictionary, string?>? validationErrorMessageProvider)
     {
         var operationResultOptions = new OperationResultOptions();
         configuration?.Invoke(operationResultOptions);
@@ -26,7 +39,7 @@ public static class ServiceCollectionExtensions
                     var problemDetails = new ProblemDetails
                     {
                         Status = statusCode,
-                        Title = validationErrorDefaultMessage ?? "One or mode validation errors occurred",
+                        Title = validationErrorMessageProvider?.Invoke(actionContext.ModelState) ?? "One or more validation errors occurred",
                         Type = $"https://httpstatuses.io/{statusCode}",
                         Instance = httpContext.Request.Path
                     };

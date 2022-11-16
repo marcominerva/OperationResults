@@ -4,11 +4,13 @@ using OperationResults.Sample.BusinessLayer;
 using OperationResults.Sample.BusinessLayer.Services;
 using OperationResults.Sample.BusinessLayer.Services.Interfaces;
 using OperationResults.Sample.DataAccessLayer;
+using OperationResults.Sample.Resources;
+using TinyHelpers.AspNetCore.Extensions;
+using TinyHelpers.AspNetCore.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -28,12 +30,18 @@ builder.Services.AddOperationResult(options =>
     // for the Operation Results of our Business Logic methods.
     options.StatusCodesMapping.Add(CustomFailureReasons.NotAvailable, StatusCodes.Status501NotImplemented);
 },
-updateModelStateResponseFactory: true,
-validationErrorDefaultMessage: "Errors occurred");
+//updateModelStateResponseFactory: true);
+// Passing a validation error default message or a validation error message provider automatically update the ModelStateResponseFactory.
+//validationErrorDefaultMessage: "Errors occurred");                            // Use this to set a static default message
+validationErrorMessageProvider: (state) => Messages.ValidationErrorMessage);    // Use this if you need to dinamically change the message, i.e., based on user culture.
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddRequestLocalization("en", "it");
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddAcceptLanguageHeader();
+});
 
 var app = builder.Build();
 
@@ -45,6 +53,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRequestLocalization();
 
 app.UseAuthorization();
 
