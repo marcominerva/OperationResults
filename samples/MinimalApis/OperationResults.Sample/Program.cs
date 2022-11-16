@@ -52,7 +52,7 @@ peopleApi.MapGet("/", async (IPeopleService peopleService, HttpContext httpConte
     // You can collapse the following instructions into a single one.
     var result = await peopleService.GetAsync();
 
-    var response = httpContext.CreateResponse(result);  // Or result.ToResponse(HttpContext)
+    var response = httpContext.CreateResponse(result);  // Or result.ToResponse(httpContext)
     return response;
 })
 .Produces<IEnumerable<Person>>()
@@ -63,7 +63,7 @@ peopleApi.MapGet("{id:guid}", async (Guid id, IPeopleService peopleService, Http
     // You can collapse the following instructions into a single one.
     var result = await peopleService.GetAsync(id);
 
-    var response = httpContext.CreateResponse(result);  // Or result.ToResponse(HttpContext)
+    var response = httpContext.CreateResponse(result);  // Or result.ToResponse(httpContext)
     return response;
 })
 .Produces<Person>()
@@ -76,7 +76,7 @@ peopleApi.MapPost("/", async (Person person, IPeopleService peopleService, HttpC
     // You can collapse the following instructions into a single one.
     var result = await peopleService.SaveAsync(person);
 
-    var response = httpContext.CreateResponse(result, "GetPerson", new { id = result.Content?.Id });  // Or result.ToResponse(HttpContext, nameof(GetPerson), new { id = result.Content?.Id });
+    var response = httpContext.CreateResponse(result, "GetPerson", new { id = result.Content?.Id });  // Or result.ToResponse(httpContext, nameof(GetPerson), new { id = result.Content?.Id });
     return response;
 })
 .Produces<Person>(StatusCodes.Status201Created)
@@ -88,7 +88,7 @@ peopleApi.MapDelete("{id:guid}", async (Guid id, IPeopleService peopleService, H
     // You can collapse the following instructions into a single one.
     var result = await peopleService.DeleteAsync(id);
 
-    var response = httpContext.CreateResponse(result);  // Or result.ToResponse(HttpContext)
+    var response = httpContext.CreateResponse(result);  // Or result.ToResponse(httpContext)
     return response;
 })
 .Produces(StatusCodes.Status204NoContent)
