@@ -11,8 +11,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\OperationResults.AspNetCore\OperationResults.AspNetCore.csproj" />
-        <ProjectReference Include="..\OperationResults.Sample.BusinessLayer\OperationResults.Sample.BusinessLayer.csproj" />
+      <ProjectReference Include="..\..\..\src\OperationResults.AspNetCore\OperationResults.AspNetCore.csproj" />
+      <ProjectReference Include="..\..\OperationResults.Sample.BusinessLayer\OperationResults.Sample.BusinessLayer.csproj" />
     </ItemGroup>
 
 </Project>
