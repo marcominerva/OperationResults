@@ -26,7 +26,7 @@ _Note: This is the library to use if you're working with Controller._
 
 This library provides HttpContext extension methods to automatically map Operation Results (that may come, for example, from a business layer) to HTTP responses, along with the appropriate status codes.
 
-A full example is available in the [Samples](https://github.com/marcominerva/OperationResults/tree/master/samples) folder. Search for the registration in the [Program.cs](https://github.com/marcominerva/OperationResults/blob/master/samples/Controllers/OperationResults.Sample/Program.cs#L22-L32) file and the usage in [Controllers](https://github.com/marcominerva/OperationResults/tree/master/samples/Controllers/OperationResults.Sample/Controllers) folder.
+A full example is available in the [Samples](https://github.com/marcominerva/OperationResults/tree/master/samples) folder. Search for the registration in the [Program.cs](https://github.com/marcominerva/OperationResults/blob/master/samples/Controllers/OperationResults.Sample/Program.cs#L24-L36) file and the usage in [Controllers](https://github.com/marcominerva/OperationResults/tree/master/samples/Controllers/OperationResults.Sample/Controllers) folder.
 
 **Installation**
 
