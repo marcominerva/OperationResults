@@ -38,7 +38,7 @@ public class Result : IGenericResult
     public static Result Fail(int failureReason, string message, string detail, ValidationError validationError)
         => new(false, failureReason: failureReason, message: message, detail: detail, validationErrors: new ValidationError[] { validationError });
 
-    public static Result Fail(int failureReason, Exception error, ValidationError validationError)
+    public static Result Fail(int failureReason, Exception? error, ValidationError validationError)
         => new(false, failureReason: failureReason, error: error, validationErrors: new ValidationError[] { validationError });
 
     public static Result Fail(int failureReason, IEnumerable<ValidationError>? validationErrors = null)
@@ -50,6 +50,6 @@ public class Result : IGenericResult
     public static Result Fail(int failureReason, string message, string detail, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, message: message, detail: detail, validationErrors: validationErrors);
 
-    public static Result Fail(int failureReason, Exception error, IEnumerable<ValidationError>? validationErrors = null)
+    public static Result Fail(int failureReason, Exception? error, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, error: error, validationErrors: validationErrors);
 }

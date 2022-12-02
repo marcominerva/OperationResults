@@ -44,7 +44,7 @@ public class Result<T> : IGenericResult<T>
     public static Result<T> Fail(int failureReason, T content, ValidationError validationError)
         => new(false, failureReason: failureReason, content: content, validationErrors: new ValidationError[] { validationError });
 
-    public static Result<T> Fail(int failureReason, Exception error, ValidationError validationError)
+    public static Result<T> Fail(int failureReason, Exception? error, ValidationError validationError)
         => new(false, failureReason: failureReason, error: error, validationErrors: new ValidationError[] { validationError });
 
     public static Result<T> Fail(int failureReason, IEnumerable<ValidationError>? validationErrors = null)
@@ -59,7 +59,7 @@ public class Result<T> : IGenericResult<T>
     public static Result<T> Fail(int failureReason, T content, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, content: content, validationErrors: validationErrors);
 
-    public static Result<T> Fail(int failureReason, Exception error, IEnumerable<ValidationError>? validationErrors = null)
+    public static Result<T> Fail(int failureReason, Exception? error, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, error: error, validationErrors: validationErrors);
 
     public static implicit operator Result<T>(T value)
