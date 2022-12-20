@@ -13,9 +13,9 @@ A set of lightweight libraries to totally decouple operation results and actual 
 
 **Installation**
 
-The library is available on [NuGet](https://www.nuget.org/packages/OperationResultTools). Just search *OperationResultTools* in the **Package Manager GUI** or run the following command in the **Package Manager Console**:
+The library is available on [NuGet](https://www.nuget.org/packages/OperationResultTools). Just search for *OperationResultTools* in the **Package Manager GUI** or run the following command in the **.NET CLI**:
 
-    Install-Package OperationResultTools
+    dotnet add package OperationResultTools
 
 ## ASP.NET Core integration library (Controller-based project)
 
@@ -30,9 +30,9 @@ A full example is available in the [Samples](https://github.com/marcominerva/Ope
 
 **Installation**
 
-The library is available on [NuGet](https://www.nuget.org/packages/OperationResultTools.AspNetCore). Just search *OperationResultTools.AspNetCore* in the **Package Manager GUI** or run the following command in the **Package Manager Console**:
+The library is available on [NuGet](https://www.nuget.org/packages/OperationResultTools.AspNetCore). Just search for *OperationResultTools.AspNetCore* in the **Package Manager GUI** or run the following command in the **.NET CLI**:
 
-    Install-Package OperationResultTools.AspNetCore
+    dotnet add package OperationResultTools.AspNetCore
 
 ## ASP.NET Core integration library (Minimal API project)
 
@@ -47,9 +47,9 @@ A full example is available in the [Samples](https://github.com/marcominerva/Ope
 
 **Installation**
 
-The library is available on [NuGet](https://www.nuget.org/packages/OperationResultTools.AspNetCore.Http). Just search *OperationResultTools.AspNetCore.Http* in the **Package Manager GUI** or run the following command in the **Package Manager Console**:
+The library is available on [NuGet](https://www.nuget.org/packages/OperationResultTools.AspNetCore.Http). Just search for *OperationResultTools.AspNetCore.Http* in the **Package Manager GUI** or run the following command in the **.NET CLI**:
 
-    Install-Package OperationResultTools.AspNetCore.Http
+    dotnet add package OperationResultTools.AspNetCore.Http
 
 
 **Contribute**

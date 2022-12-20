@@ -12,13 +12,22 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration = null)
         => services.AddOperationResult(configuration, false, (modelState) => null);
 
-    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration = null, bool updateModelStateResponseFactory = false)
+    public static IServiceCollection AddOperationResult(this IServiceCollection services, bool updateModelStateResponseFactory)
+        => services.AddOperationResult(null, updateModelStateResponseFactory, (modelState) => null);
+
+    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration, bool updateModelStateResponseFactory)
         => services.AddOperationResult(configuration, updateModelStateResponseFactory, (modelState) => null);
 
-    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration = null, string? validationErrorDefaultMessage = null)
+    public static IServiceCollection AddOperationResult(this IServiceCollection services, string? validationErrorDefaultMessage)
+        => services.AddOperationResult(null, true, (modelState) => validationErrorDefaultMessage);
+
+    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration, string? validationErrorDefaultMessage)
         => services.AddOperationResult(configuration, true, (modelState) => validationErrorDefaultMessage);
 
-    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration = null, Func<ModelStateDictionary, string?>? validationErrorMessageProvider = null)
+    public static IServiceCollection AddOperationResult(this IServiceCollection services, Func<ModelStateDictionary, string?>? validationErrorMessageProvider)
+        => services.AddOperationResult(null, true, validationErrorMessageProvider);
+
+    public static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration, Func<ModelStateDictionary, string?>? validationErrorMessageProvider)
         => services.AddOperationResult(configuration, true, validationErrorMessageProvider);
 
     private static IServiceCollection AddOperationResult(this IServiceCollection services, Action<OperationResultOptions>? configuration, bool updateModelStateResponseFactory, Func<ModelStateDictionary, string?>? validationErrorMessageProvider)
