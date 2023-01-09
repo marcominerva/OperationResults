@@ -23,6 +23,22 @@ public static class OperationResultExtensions
         return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
     }
 
+    public static IResult ToResponse(this Result result, HttpContext httpContext, string? routeName, object? routeValues = null, int? successStatusCode = null)
+    {
+        if (result.Success)
+        {
+            var routeValueDictionary = new RouteValueDictionary(routeValues);
+
+#if NET6_0
+            return Results.CreatedAtRoute(routeName, routeValues);
+#else
+            return TypedResults.CreatedAtRoute(routeName, routeValues);
+#endif
+        }
+
+        return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+    }
+
     public static IResult ToResponse<T>(this Result<T> result, HttpContext httpContext, int? successStatusCode = null)
         => result.ToResponse(httpContext, null, null, successStatusCode);
 
