@@ -15,7 +15,7 @@ public static class OperationResultExtensions
             return new StatusCodeResult(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent));
         }
 
-        return Problem(httpContext, FailureReasonToStatusCode(httpContext, result.FailureReason), null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+        return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
     }
 
     public static IActionResult ToResponse<T>(this Result<T> result, HttpContext httpContext, int? successStatusCode = null)
@@ -66,11 +66,14 @@ public static class OperationResultExtensions
             return new StatusCodeResult(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent));
         }
 
-        return Problem(httpContext, FailureReasonToStatusCode(httpContext, result.FailureReason), result.Content, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+        return Problem(httpContext, result.FailureReason, result.Content, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
     }
 
-    private static IActionResult Problem(HttpContext httpContext, int statusCode, object? content = null, string? title = null, string? detail = null, IEnumerable<ValidationError>? validationErrors = null)
+    private static IActionResult Problem(HttpContext httpContext, int failureReason, object? content = null, string? title = null, string? detail = null, IEnumerable<ValidationError>? validationErrors = null)
     {
+        var options = httpContext.RequestServices.GetService<OperationResultOptions>() ?? new OperationResultOptions();
+        var statusCode = options.GetStatusCode(failureReason);
+
         if (content is not null)
         {
             var objectResult = new ObjectResult(content)
@@ -94,8 +97,6 @@ public static class OperationResultExtensions
 
         if (validationErrors?.Any() ?? false)
         {
-            var options = httpContext.RequestServices.GetRequiredService<OperationResultOptions>();
-
             if (options.ErrorResponseFormat == ErrorResponseFormat.Default)
             {
                 var errors = validationErrors.GroupBy(v => v.Name).ToDictionary(k => k.Key, v => v.Select(e => e.Message));
@@ -113,13 +114,5 @@ public static class OperationResultExtensions
         };
 
         return problemDetailsResults;
-    }
-
-    private static int FailureReasonToStatusCode(HttpContext httpContext, int failureReason, int? defaultResponseStatusCode = null)
-    {
-        var options = httpContext.RequestServices.GetRequiredService<OperationResultOptions>();
-        var statusCode = options.GetStatusCode(failureReason, defaultResponseStatusCode);
-
-        return statusCode;
     }
 }

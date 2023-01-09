@@ -20,7 +20,7 @@ public static class OperationResultExtensions
 #endif
         }
 
-        return Problem(httpContext, FailureReasonToStatusCode(httpContext, result.FailureReason), null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+        return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
     }
 
     public static IResult ToResponse<T>(this Result<T> result, HttpContext httpContext, int? successStatusCode = null)
@@ -73,11 +73,14 @@ public static class OperationResultExtensions
 #endif
         }
 
-        return Problem(httpContext, FailureReasonToStatusCode(httpContext, result.FailureReason), result.Content, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+        return Problem(httpContext, result.FailureReason, result.Content, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
     }
 
-    private static IResult Problem(HttpContext httpContext, int statusCode, object? content = null, string? title = null, string? detail = null, IEnumerable<ValidationError>? validationErrors = null)
+    private static IResult Problem(HttpContext httpContext, int failureReason, object? content = null, string? title = null, string? detail = null, IEnumerable<ValidationError>? validationErrors = null)
     {
+        var options = httpContext.RequestServices.GetService<OperationResultOptions>() ?? new OperationResultOptions();
+        var statusCode = options.GetStatusCode(failureReason);
+
         if (content is not null)
         {
 #if NET6_0
@@ -100,8 +103,6 @@ public static class OperationResultExtensions
 
         if (validationErrors?.Any() ?? false)
         {
-            var options = httpContext.RequestServices.GetRequiredService<OperationResultOptions>();
-
             if (options.ErrorResponseFormat == ErrorResponseFormat.Default)
             {
                 var errors = validationErrors.GroupBy(v => v.Name).ToDictionary(k => k.Key, v => v.Select(e => e.Message));
@@ -118,13 +119,5 @@ public static class OperationResultExtensions
 #else
         return TypedResults.Json(problemDetails, statusCode: statusCode);
 #endif
-    }
-
-    private static int FailureReasonToStatusCode(HttpContext httpContext, int failureReason, int? defaultResponseStatusCode = null)
-    {
-        var options = httpContext.RequestServices.GetRequiredService<OperationResultOptions>();
-        var statusCode = options.GetStatusCode(failureReason, defaultResponseStatusCode);
-
-        return statusCode;
     }
 }
