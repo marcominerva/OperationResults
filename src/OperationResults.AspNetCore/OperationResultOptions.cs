@@ -8,6 +8,8 @@ public class OperationResultOptions
 
     public Dictionary<int, int> StatusCodesMapping { get; }
 
+    public bool UseHttpStatusCodes { get; set; }
+
     public OperationResultOptions()
     {
         StatusCodesMapping = new Dictionary<int, int>

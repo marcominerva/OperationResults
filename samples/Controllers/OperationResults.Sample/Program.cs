@@ -29,6 +29,10 @@ builder.Services.AddOperationResult(options =>
     // Adding new mappings or editing the existing ones allows to define what HTTP Status Codes the API must return
     // for the Operation Results of our Business Logic methods.
     options.StatusCodesMapping.Add(CustomFailureReasons.NotAvailable, StatusCodes.Status501NotImplemented);
+
+    // If you just want to directly use HTTP status codes as failure reasons, set the following property to true.
+    // In this way, the code you use with Result.Fail() will be used as response status code with no further mapping.
+    // options.UseHttpStatusCodes = true;
 },
 //updateModelStateResponseFactory: true);
 // Passing a validation error default message or a validation error message provider automatically update the ModelStateResponseFactory.

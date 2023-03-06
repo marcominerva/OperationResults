@@ -87,7 +87,7 @@ public static class OperationResultExtensions
     private static IActionResult Problem(HttpContext httpContext, int failureReason, object? content = null, string? title = null, string? detail = null, IEnumerable<ValidationError>? validationErrors = null)
     {
         var options = httpContext.RequestServices.GetService<OperationResultOptions>() ?? new OperationResultOptions();
-        var statusCode = options.GetStatusCode(failureReason);
+        var statusCode = options.UseHttpStatusCodes ? failureReason : options.GetStatusCode(failureReason);
 
         if (content is not null)
         {
