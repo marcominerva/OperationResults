@@ -123,9 +123,10 @@ public static class OperationResultExtensions
             }
         }
 
-        var problemDetailsResults = new ObjectResult(problemDetails)
+        var problemDetailsResults = new JsonResult(problemDetails)
         {
-            StatusCode = statusCode
+            StatusCode = statusCode,
+            ContentType = "application/problem+json; charset=utf-8"
         };
 
         return problemDetailsResults;
