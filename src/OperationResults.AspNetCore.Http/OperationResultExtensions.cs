@@ -131,9 +131,9 @@ public static class OperationResultExtensions
         }
 
 #if NET6_0
-        return Results.Json(problemDetails, statusCode: statusCode);
+        return Results.Json(problemDetails, statusCode: statusCode, contentType: "application/problem+json; charset=utf-8");
 #else
-        return TypedResults.Json(problemDetails, statusCode: statusCode);
+        return TypedResults.Json(problemDetails, statusCode: statusCode, contentType: "application/problem+json; charset=utf-8");
 #endif
     }
 }
