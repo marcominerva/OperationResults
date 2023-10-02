@@ -16,6 +16,7 @@ jobs:
   publish:
     name: Publish on NuGet
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'marcominerva'
 
     steps:
     - name: Checkout
