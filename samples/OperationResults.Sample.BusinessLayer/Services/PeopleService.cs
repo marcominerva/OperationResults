@@ -6,15 +6,8 @@ using Entities = OperationResults.Sample.DataAccessLayer.Entities;
 
 namespace OperationResults.Sample.BusinessLayer.Services;
 
-public class PeopleService : IPeopleService
+public class PeopleService(ApplicationDbContext dbContext) : IPeopleService
 {
-    private readonly ApplicationDbContext dbContext;
-
-    public PeopleService(ApplicationDbContext dbContext)
-    {
-        this.dbContext = dbContext;
-    }
-
     public async Task<Result<IEnumerable<Person>>> GetAsync()
     {
         var people = await dbContext.People.AsNoTracking()

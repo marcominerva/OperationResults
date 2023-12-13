@@ -9,17 +9,10 @@ namespace OperationResults.Sample.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces(MediaTypeNames.Application.Json)]
-public class PeopleController : ControllerBase
+public class PeopleController(IPeopleService peopleService) : ControllerBase
 {
-    private readonly IPeopleService peopleService;
-
-    public PeopleController(IPeopleService peopleService)
-    {
-        this.peopleService = peopleService;
-    }
-
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Person>))]
+    [ProducesResponseType<IEnumerable<Person>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetList()
     {
         // You can collapse the following instructions into a single one.
@@ -42,7 +35,7 @@ public class PeopleController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Person))]
+    [ProducesResponseType<Person>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Save(Person person)
     {

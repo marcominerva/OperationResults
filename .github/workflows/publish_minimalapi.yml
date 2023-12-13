@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  NET_VERSION: '7.x'
+  NET_VERSION: '8.x'
   PROJECT_NAME: src/OperationResults.AspNetCore.Http
   PROJECT_FILE: OperationResults.AspNetCore.Http.csproj
   TAG_NAME: minimalapi
@@ -16,7 +16,8 @@ env:
 jobs:
   publish:
     name: Publish on NuGet
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    
+    if: ${{ github.repository_owner == vars.REPOSITORY_OWNER }}
 
     steps:
     - name: Checkout
