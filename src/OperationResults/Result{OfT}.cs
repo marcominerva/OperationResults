@@ -33,19 +33,19 @@ public class Result<T> : IGenericResult<T>
         => new(success: true, content);
 
     public static Result<T> Fail(int failureReason, ValidationError validationError)
-        => new(false, failureReason: failureReason, validationErrors: new ValidationError[] { validationError });
+        => new(false, failureReason: failureReason, validationErrors: [validationError]);
 
     public static Result<T> Fail(int failureReason, string message, ValidationError validationError)
-        => new(false, failureReason: failureReason, message: message, validationErrors: new ValidationError[] { validationError });
+        => new(false, failureReason: failureReason, message: message, validationErrors: [validationError]);
 
     public static Result<T> Fail(int failureReason, string message, string detail, ValidationError validationError)
-        => new(false, failureReason: failureReason, message: message, detail: detail, validationErrors: new ValidationError[] { validationError });
+        => new(false, failureReason: failureReason, message: message, detail: detail, validationErrors: [validationError]);
 
     public static Result<T> Fail(int failureReason, T content, ValidationError validationError)
-        => new(false, failureReason: failureReason, content: content, validationErrors: new ValidationError[] { validationError });
+        => new(false, failureReason: failureReason, content: content, validationErrors: [validationError]);
 
     public static Result<T> Fail(int failureReason, Exception? error, ValidationError validationError)
-        => new(false, failureReason: failureReason, error: error, validationErrors: new ValidationError[] { validationError });
+        => new(false, failureReason: failureReason, error: error, validationErrors: [validationError]);
 
     public static Result<T> Fail(int failureReason, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, validationErrors: validationErrors);
