@@ -29,6 +29,12 @@ public class Result<T> : IGenericResult<T>
         ValidationErrors = validationErrors;
     }
 
+    public bool TryGet(out T? value)
+    {
+        value = Content;
+        return Success;
+    }
+
     public static Result<T> Ok(T? content = default)
         => new(success: true, content);
 
