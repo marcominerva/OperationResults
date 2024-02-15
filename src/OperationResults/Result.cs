@@ -52,4 +52,13 @@ public class Result : IGenericResult
 
     public static Result Fail(int failureReason, Exception? error, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, error: error, validationErrors: validationErrors);
+
+    public static bool operator true(Result result)
+        => result.Success;
+
+    public static bool operator false(Result result)
+        => !result.Success;
+
+    public static implicit operator bool(Result result)
+        => result.Success;
 }
