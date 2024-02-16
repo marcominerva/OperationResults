@@ -74,6 +74,19 @@ peopleApi.MapGet("{id:guid}", async (Guid id, IPeopleService peopleService, Http
 .WithName("GetPerson")
 .WithOpenApi();
 
+peopleApi.MapGet("{id:guid}/with-image", async (Guid id, IPeopleService peopleService, HttpContext httpContext) =>
+{
+    // You can collapse the following instructions into a single one.
+    var result = await peopleService.GetWithImageAsync(id);
+
+    var response = httpContext.CreateResponse(result);  // Or result.ToResponse(httpContext)
+    return response;
+})
+.Produces<PersonWithImage>()
+.Produces(StatusCodes.Status404NotFound)
+.WithName("GetPersonWithImage")
+.WithOpenApi();
+
 peopleApi.MapPost("/", async (Person person, IPeopleService peopleService, HttpContext httpContext) =>
 {
     // You can collapse the following instructions into a single one.
