@@ -6,7 +6,7 @@ using Entities = OperationResults.Sample.DataAccessLayer.Entities;
 
 namespace OperationResults.Sample.BusinessLayer.Services;
 
-public class PeopleService(ApplicationDbContext dbContext) : IPeopleService
+public class PeopleService(ApplicationDbContext dbContext, IImageService imageService) : IPeopleService
 {
     public async Task<Result<IEnumerable<Person>>> GetAsync()
     {
@@ -43,6 +43,38 @@ public class PeopleService(ApplicationDbContext dbContext) : IPeopleService
         };
 
         return person;
+    }
+
+    public async Task<Result<PersonWithImage>> GetWithImageAsync(Guid id)
+    {
+        var personResult = await GetAsync(id);
+        if (!personResult) // A shortcut to !personResult.Success
+        {
+            // The person operation failed
+            return Result.Fail(personResult.FailureReason);
+        }
+
+        var person = personResult.Content!;
+        var imageResult = await imageService.GetImageAsync();
+        if (imageResult.TryGet(out var imageFileContent) && imageFileContent is not null)
+        {
+            // The image operation succeeded, return person with image
+            var personWithImage = new PersonWithImage
+            {
+                Person = person,
+                Image = imageFileContent.Content
+            };
+
+            return personWithImage;
+        }
+
+        // The image operation failed, return person without image
+        var personWithoutImage = new PersonWithImage
+        {
+            Person = person
+        };
+
+        return personWithoutImage;
     }
 
     public async Task<Result<Person>> SaveAsync(Person person)

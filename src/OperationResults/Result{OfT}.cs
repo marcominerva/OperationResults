@@ -29,6 +29,12 @@ public class Result<T> : IGenericResult<T>
         ValidationErrors = validationErrors;
     }
 
+    public bool TryGet(out T? value)
+    {
+        value = Content;
+        return Success;
+    }
+
     public static Result<T> Ok(T? content = default)
         => new(success: true, content);
 
@@ -67,4 +73,13 @@ public class Result<T> : IGenericResult<T>
 
     public static implicit operator Result<T>(Result result)
         => new(result.Success, default, result.FailureReason, result.ErrorMessage, result.ErrorDetail, result.Error, result.ValidationErrors);
+
+    public static bool operator true(Result<T> result)
+        => result.Success;
+
+    public static bool operator false(Result<T> result)
+        => !result.Success;
+
+    public static implicit operator bool(Result<T> result)
+        => result.Success;
 }
