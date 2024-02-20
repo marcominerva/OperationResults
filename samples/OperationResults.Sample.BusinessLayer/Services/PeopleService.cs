@@ -57,7 +57,7 @@ public class PeopleService(ApplicationDbContext dbContext, IImageService imageSe
         var person = personResult.Content!;
 
         var imageResult = await imageService.GetImageAsync();
-        if (imageResult.TryGetContent(out var imageFileContent) && imageFileContent is not null)
+        if (imageResult.TryGetContent(out var imageFileContent))
         {
             // The image operation succeeded, return person with image
             var personWithImage = new PersonWithImage
