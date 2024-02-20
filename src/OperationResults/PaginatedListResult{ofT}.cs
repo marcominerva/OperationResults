@@ -16,13 +16,13 @@ public class PaginatedListResult<T>
     {
     }
 
-    public PaginatedListResult(IEnumerable<T>? items, int totalCount, int pageIndex, int pageSize = 0)
+    public PaginatedListResult(IEnumerable<T>? items, int totalCount, int pageIndex, int pageSize)
     {
         Items = items;
         TotalCount = totalCount;
         PageIndex = pageIndex;
-        PageSize = pageSize > 0 ? pageSize : items?.Count() ?? 0;
-        HasNextPage = totalCount > (pageIndex * PageSize) + (items?.Count() ?? 0);
+        PageSize = pageSize;
+        HasNextPage = totalCount > (pageIndex * pageSize) + (items?.Count() ?? 0);
     }
 
     public PaginatedListResult(IEnumerable<T>? items, bool hasNextPage = false) : this(items, items?.Count() ?? 0, hasNextPage)
