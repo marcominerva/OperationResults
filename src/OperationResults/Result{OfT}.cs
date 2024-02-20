@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace OperationResults;
 
 public class Result<T> : IGenericResult<T>
@@ -29,9 +31,9 @@ public class Result<T> : IGenericResult<T>
         ValidationErrors = validationErrors;
     }
 
-    public bool TryGet(out T? value)
+    public bool TryGetContent([NotNullWhen(returnValue: true)] T? content)
     {
-        value = Content;
+        content = Content;
         return Success;
     }
 

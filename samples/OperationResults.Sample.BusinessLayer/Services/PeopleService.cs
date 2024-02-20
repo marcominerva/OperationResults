@@ -48,15 +48,16 @@ public class PeopleService(ApplicationDbContext dbContext, IImageService imageSe
     public async Task<Result<PersonWithImage>> GetWithImageAsync(Guid id)
     {
         var personResult = await GetAsync(id);
+
         if (!personResult) // A shortcut to !personResult.Success
         {
-            // The person operation failed
             return Result.Fail(personResult.FailureReason);
         }
 
         var person = personResult.Content!;
+
         var imageResult = await imageService.GetImageAsync();
-        if (imageResult.TryGet(out var imageFileContent) && imageFileContent is not null)
+        if (imageResult.TryGetContent(out var imageFileContent) && imageFileContent is not null)
         {
             // The image operation succeeded, return person with image
             var personWithImage = new PersonWithImage
