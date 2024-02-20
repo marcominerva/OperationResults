@@ -31,7 +31,7 @@ public class Result<T> : IGenericResult<T>
         ValidationErrors = validationErrors;
     }
 
-    public bool TryGetContent([NotNullWhen(returnValue: true)] T? content)
+    public bool TryGetContent([NotNullWhen(returnValue: true)] out T? content)
     {
         content = Content;
         return Success;
