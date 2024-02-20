@@ -34,6 +34,18 @@ public class PeopleController(IPeopleService peopleService) : ControllerBase
         return response;
     }
 
+    [HttpGet("{id:guid}/with-image", Name = nameof(GetPersonWithImage))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PersonWithImage))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPersonWithImage(Guid id)
+    {
+        // You can collapse the following instructions into a single one.
+        var result = await peopleService.GetWithImageAsync(id);
+
+        var response = HttpContext.CreateResponse(result);  // Or result.ToResponse(HttpContext)
+        return response;
+    }
+
     [HttpPost]
     [ProducesResponseType<Person>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

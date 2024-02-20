@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace OperationResults;
 
 public class Result<T> : IGenericResult<T>
@@ -27,6 +29,12 @@ public class Result<T> : IGenericResult<T>
         errorDetail = detail;
         Error = error;
         ValidationErrors = validationErrors;
+    }
+
+    public bool TryGetContent([NotNullWhen(returnValue: true)] out T? content)
+    {
+        content = Content;
+        return Success;
     }
 
     public static Result<T> Ok(T? content = default)
@@ -67,4 +75,13 @@ public class Result<T> : IGenericResult<T>
 
     public static implicit operator Result<T>(Result result)
         => new(result.Success, default, result.FailureReason, result.ErrorMessage, result.ErrorDetail, result.Error, result.ValidationErrors);
+
+    public static bool operator true(Result<T> result)
+        => result.Success;
+
+    public static bool operator false(Result<T> result)
+        => !result.Success;
+
+    public static implicit operator bool(Result<T> result)
+        => result.Success;
 }
