@@ -4,6 +4,7 @@ namespace OperationResults;
 
 public class Result<T> : IGenericResult<T>
 {
+    [MemberNotNullWhen(true, nameof(Content))]
     public bool Success { get; }
 
     public T? Content { get; }
