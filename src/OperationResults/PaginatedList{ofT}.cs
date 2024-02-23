@@ -1,6 +1,6 @@
 ﻿namespace OperationResults;
 
-public class PaginatedListResult<T>
+public class PaginatedList<T>
 {
     public IEnumerable<T>? Items { get; set; }
 
@@ -12,11 +12,11 @@ public class PaginatedListResult<T>
 
     public bool HasNextPage { get; set; }
 
-    public PaginatedListResult()
+    public PaginatedList()
     {
     }
 
-    public PaginatedListResult(IEnumerable<T>? items, int totalCount, int pageIndex, int pageSize)
+    public PaginatedList(IEnumerable<T>? items, int totalCount, int pageIndex, int pageSize)
     {
         Items = items;
         TotalCount = totalCount;
@@ -25,11 +25,11 @@ public class PaginatedListResult<T>
         HasNextPage = totalCount > (pageIndex * pageSize) + (items?.Count() ?? 0);
     }
 
-    public PaginatedListResult(IEnumerable<T>? items, bool hasNextPage = false) : this(items, items?.Count() ?? 0, hasNextPage)
+    public PaginatedList(IEnumerable<T>? items, bool hasNextPage = false) : this(items, items?.Count() ?? 0, hasNextPage)
     {
     }
 
-    public PaginatedListResult(IEnumerable<T>? items, int totalCount, bool hasNextPage = false)
+    public PaginatedList(IEnumerable<T>? items, int totalCount, bool hasNextPage = false)
     {
         Items = items;
         TotalCount = totalCount;
