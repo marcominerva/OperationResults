@@ -10,6 +10,10 @@ public class OperationResultOptions
 
     public bool UseHttpStatusCodes { get; set; }
 
+    public UnmappedFailureReasonBehavior UnmappedFailureReasonBehavior { get; set; }
+
+    public int UnmappedFailureReasonStatusCode { get; set; } = StatusCodes.Status500InternalServerError;
+
     public OperationResultOptions()
     {
         StatusCodesMapping = new Dictionary<int, int>
@@ -30,7 +34,11 @@ public class OperationResultOptions
     {
         if (!StatusCodesMapping.TryGetValue(failureReason, out var statusCode))
         {
-            statusCode = defaultStatusCode.GetValueOrDefault(StatusCodes.Status501NotImplemented);
+            statusCode = UnmappedFailureReasonBehavior switch
+            {
+                UnmappedFailureReasonBehavior.UseDefaultStatusCode => defaultStatusCode.GetValueOrDefault(UnmappedFailureReasonStatusCode),
+                _ => failureReason
+            };
         }
 
         return statusCode;
