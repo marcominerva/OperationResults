@@ -32,7 +32,7 @@ builder.Services.AddOperationResult(options =>
 
     // If you just want to directly use HTTP status codes as failure reasons, set the following property to false.
     // In this way, the code you use with Result.Fail() will be used as response status code with no further mapping.
-    // options.MapStatusCodes = false;
+    //options.MapStatusCodes = false;
 },
 //updateModelStateResponseFactory: true);
 // Passing a validation error default message or a validation error message provider automatically update the ModelStateResponseFactory.
