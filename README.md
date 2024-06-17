@@ -43,7 +43,7 @@ _Note: This is the library to use if you're working with Minimal APIs._
 
 This library provides HttpContext extension methods to automatically map Operation Results (that may come, for example, from a business layer) to HTTP responses, along with the appropriate status codes.
 
-A full example is available in the [Samples](https://github.com/marcominerva/OperationResults/tree/master/samples) folder. Search for the [registration](https://github.com/marcominerva/OperationResults/blob/master/samples/MinimalApis/OperationResults.Sample/Program.cs#L23-L25) and the [usage](https://github.com/marcominerva/OperationResults/blob/master/samples/MinimalApis/OperationResults.Sample/Program.cs#L51-L106) in [Program.cs](https://github.com/marcominerva/OperationResults/blob/master/samples/MinimalApis/OperationResults.Sample/Program.cs) file.
+A full example is available in the [Samples](https://github.com/marcominerva/OperationResults/tree/master/samples) folder. Search for the [registration](https://github.com/marcominerva/OperationResults/blob/master/samples/MinimalApis/OperationResults.Sample/Program.cs#L23-L35) and the [usage](https://github.com/marcominerva/OperationResults/blob/master/samples/MinimalApis/OperationResults.Sample/Program.cs#L51-L106) in [Program.cs](https://github.com/marcominerva/OperationResults/blob/master/samples/MinimalApis/OperationResults.Sample/Program.cs) file.
 
 **Installation**
 
