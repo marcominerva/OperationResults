@@ -2,6 +2,6 @@
 
 public enum UnmappedFailureReasonBehavior
 {
-    UseFailureReason,
     UseDefaultStatusCode,
+    UseFailureReason
 }

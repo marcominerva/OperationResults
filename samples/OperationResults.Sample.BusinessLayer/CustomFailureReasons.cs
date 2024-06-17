@@ -2,5 +2,5 @@
 
 public static class CustomFailureReasons
 {
-    public const int NotAvailable = 1001;
+    public const int NotAvailable = FailureReasons.GenericError + 1;
 }
