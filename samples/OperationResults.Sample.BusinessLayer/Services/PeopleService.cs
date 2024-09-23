@@ -123,19 +123,19 @@ public class PeopleService(ApplicationDbContext dbContext, IImageService imageSe
     {
         var dbPerson = await dbContext.People.FirstOrDefaultAsync(p => p.Id == id);
 
-        if (dbPerson is not null)
+        if (dbPerson is null)
         {
-            if (dbPerson.FirstName == "Admin")
-            {
-                return Result.Fail(FailureReasons.Forbidden, "You cannot delete the Admin user");
-            }
-
-            dbContext.Remove(dbPerson);
-            await dbContext.SaveChangesAsync();
-
-            return Result.Ok();
+            return Result.Fail(FailureReasons.ItemNotFound);
         }
 
-        return Result.Fail(FailureReasons.ItemNotFound);
+        if (dbPerson.FirstName == "Admin")
+        {
+            return Result.Fail(FailureReasons.Forbidden, "You cannot delete the Admin user");
+        }
+
+        dbContext.Remove(dbPerson);
+        await dbContext.SaveChangesAsync();
+
+        return Result.Ok();
     }
 }

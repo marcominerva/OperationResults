@@ -23,7 +23,7 @@ public static class OperationResultExtensions
         return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
     }
 
-    public static IResult ToResponse(this Result result, HttpContext httpContext, string? routeName, object? routeValues = null, int? successStatusCode = null)
+    public static IResult ToResponse(this Result result, HttpContext httpContext, string? routeName, object? routeValues = null)
     {
         if (result.Success)
         {
@@ -109,7 +109,6 @@ public static class OperationResultExtensions
         var problemDetails = new ProblemDetails
         {
             Status = statusCode,
-            Type = $"https://httpstatuses.io/{statusCode}",
             Title = title ?? ReasonPhrases.GetReasonPhrase(statusCode),
             Detail = detail,
             Instance = httpContext.Request.Path
@@ -131,9 +130,12 @@ public static class OperationResultExtensions
         }
 
 #if NET6_0
-        return Results.Json(problemDetails, statusCode: statusCode, contentType: "application/problem+json; charset=utf-8");
+        return Results.Problem(problemDetails);
 #else
-        return TypedResults.Json(problemDetails, statusCode: statusCode, contentType: "application/problem+json; charset=utf-8");
+        var problemResult = TypedResults.Problem(problemDetails);
+        problemResult.ProblemDetails.Type ??= $"https://httpstatuses.io/{statusCode}";
+
+        return problemResult;
 #endif
     }
 }
