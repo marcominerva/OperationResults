@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -99,16 +99,10 @@ public static class OperationResultExtensions
             return objectResult;
         }
 
-        var problemDetails = new ProblemDetails
-        {
-            Status = statusCode,
-            Type = $"https://httpstatuses.io/{statusCode}",
-            Title = title ?? ReasonPhrases.GetReasonPhrase(statusCode),
-            Detail = detail,
-            Instance = httpContext.Request.Path
-        };
-
-        problemDetails.Extensions.Add("traceId", Activity.Current?.Id ?? httpContext.TraceIdentifier);
+        var problemDetailsFactory = httpContext.RequestServices.GetRequiredService<ProblemDetailsFactory>();
+        var problemDetails = problemDetailsFactory.CreateProblemDetails(httpContext, statusCode, title ?? ReasonPhrases.GetReasonPhrase(statusCode),
+            detail: detail, instance: httpContext.Request.Path);
+        problemDetails.Type ??= $"https://httpstatuses.io/{statusCode}";
 
         if (validationErrors?.Any() ?? false)
         {
@@ -123,12 +117,12 @@ public static class OperationResultExtensions
             }
         }
 
-        var problemDetailsResults = new JsonResult(problemDetails)
+        var problemDetailsResult = new JsonResult(problemDetails)
         {
             StatusCode = statusCode,
-            ContentType = "application/problem+json; charset=utf-8"
+            ContentType = "application/problem+json"
         };
 
-        return problemDetailsResults;
+        return problemDetailsResult;
     }
 }

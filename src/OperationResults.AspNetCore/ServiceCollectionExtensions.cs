@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -45,15 +45,11 @@ public static class ServiceCollectionExtensions
                 {
                     var httpContext = actionContext.HttpContext;
                     var statusCode = operationResultOptions.GetStatusCode(FailureReasons.ClientError, StatusCodes.Status400BadRequest);
-                    var problemDetails = new ProblemDetails
-                    {
-                        Status = statusCode,
-                        Title = validationErrorMessageProvider?.Invoke(actionContext.ModelState) ?? "One or more validation errors occurred",
-                        Type = $"https://httpstatuses.io/{statusCode}",
-                        Instance = httpContext.Request.Path
-                    };
 
-                    problemDetails.Extensions.Add("traceId", Activity.Current?.Id ?? httpContext.TraceIdentifier);
+                    var problemDetailsFactory = httpContext.RequestServices.GetRequiredService<ProblemDetailsFactory>();
+                    var problemDetails = problemDetailsFactory.CreateProblemDetails(httpContext, statusCode, validationErrorMessageProvider?.Invoke(actionContext.ModelState) ?? "One or more validation errors occurred",
+                        instance: httpContext.Request.Path);
+                    problemDetails.Type ??= $"https://httpstatuses.io/{statusCode}";
 
                     if (operationResultOptions.ErrorResponseFormat == ErrorResponseFormat.Default)
                     {
@@ -72,12 +68,13 @@ public static class ServiceCollectionExtensions
                         problemDetails.Extensions.Add("errors", errors);
                     }
 
-                    var result = new ObjectResult(problemDetails)
+                    var problemDetailsResult = new JsonResult(problemDetails)
                     {
-                        StatusCode = statusCode
+                        StatusCode = statusCode,
+                        ContentType = "application/problem+json"
                     };
 
-                    return result;
+                    return problemDetailsResult;
                 };
             });
         }
