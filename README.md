@@ -17,7 +17,7 @@ The library is available on [NuGet](https://www.nuget.org/packages/OperationResu
 
     dotnet add package OperationResultTools
 
-## ASP.NET Core integration library (Controller-based project)
+## ASP.NET Core integration library (Controller-based projects)
 
 [![NuGet](https://img.shields.io/nuget/v/OperationResultTools.AspNetCore.svg?style=flat-square)](https://www.nuget.org/packages/OperationResultTools.AspNetCore)
 [![Nuget](https://img.shields.io/nuget/dt/OperationResultTools.AspNetCore)](https://www.nuget.org/packages/OperationResultTools.AspNetCore)
@@ -34,7 +34,7 @@ The library is available on [NuGet](https://www.nuget.org/packages/OperationResu
 
     dotnet add package OperationResultTools.AspNetCore
 
-## ASP.NET Core integration library (Minimal API project)
+## ASP.NET Core integration library (Minimal API projects)
 
 [![NuGet](https://img.shields.io/nuget/v/OperationResultTools.AspNetCore.Http.svg?style=flat-square)](https://www.nuget.org/packages/OperationResultTools.AspNetCore.Http)
 [![Nuget](https://img.shields.io/nuget/dt/OperationResultTools.AspNetCore.Http)](https://www.nuget.org/packages/OperationResultTools.AspNetCore.Http)
