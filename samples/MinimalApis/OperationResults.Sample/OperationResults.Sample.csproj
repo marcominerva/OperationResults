@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.10" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\src\OperationResults.AspNetCore.Http\OperationResults.AspNetCore.Http.csproj" />
+      <ProjectReference Include="..\..\OperationResults.Sample.BusinessLayer\OperationResults.Sample.BusinessLayer.csproj" />
+    </ItemGroup>
+
+</Project>

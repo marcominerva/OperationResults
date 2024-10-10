@@ -24,9 +24,9 @@ The library is available on [NuGet](https://www.nuget.org/packages/OperationResu
 
 _Note: This is the library to use if you're working with Controller._
 
-This library provides HttpContext extension methods to automatically map Operation Results (that may come, for example, from a business layer) to HTTP responses, along with the appropriate status codes.
+This library provides HttpContext extension methods to automatically map Operation Results (that may come, for sample, from a business layer) to HTTP responses, along with the appropriate status codes.
 
-A full example is available in the [Example folder](https://github.com/marcominerva/OperationResults/tree/master/examples). Search for the registration in the [Program.cs](https://github.com/marcominerva/OperationResults/blob/master/examples/Controllers/OperationResults.Example/Program.cs#L24-L40) file and the usage in [Controllers folder](https://github.com/marcominerva/OperationResults/tree/master/examples/Controllers/OperationResults.Example/Controllers).
+A full sample is available in the [Sample folder](https://github.com/marcominerva/OperationResults/tree/master/samples). Search for the registration in the [Program.cs](https://github.com/marcominerva/OperationResults/blob/master/samples/Controllers/OperationResults.Sample/Program.cs#L24-L40) file and the usage in [Controllers folder](https://github.com/marcominerva/OperationResults/tree/master/samples/Controllers/OperationResults.Sample/Controllers).
 
 **Installation**
 
@@ -41,9 +41,9 @@ The library is available on [NuGet](https://www.nuget.org/packages/OperationResu
 
 _Note: This is the library to use if you're working with Minimal APIs._
 
-This library provides HttpContext extension methods to automatically map Operation Results (that may come, for example, from a business layer) to HTTP responses, along with the appropriate status codes.
+This library provides HttpContext extension methods to automatically map Operation Results (that may come, for sample, from a business layer) to HTTP responses, along with the appropriate status codes.
 
-A full example is available in the [Examples folder](https://github.com/marcominerva/OperationResults/tree/master/examples). Search for the [registration](https://github.com/marcominerva/OperationResults/blob/master/examples/MinimalApis/OperationResults.Example/Program.cs#L23-L35) and the [usage](https://github.com/marcominerva/OperationResults/blob/master/examples/MinimalApis/OperationResults.Example/Program.cs#L51-L106) in [Program.cs](https://github.com/marcominerva/OperationResults/blob/master/examples/MinimalApis/OperationResults.Example/Program.cs) file.
+A full sample is available in the [Samples folder](https://github.com/marcominerva/OperationResults/tree/master/samples). Search for the [registration](https://github.com/marcominerva/OperationResults/blob/master/samples/MinimalApis/OperationResults.Sample/Program.cs#L23-L35) and the [usage](https://github.com/marcominerva/OperationResults/blob/master/samples/MinimalApis/OperationResults.Sample/Program.cs#L51-L106) in [Program.cs](https://github.com/marcominerva/OperationResults/blob/master/samples/MinimalApis/OperationResults.Sample/Program.cs) file.
 
 **Installation**
 
