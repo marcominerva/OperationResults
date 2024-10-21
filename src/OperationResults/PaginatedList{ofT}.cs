@@ -16,25 +16,37 @@ public class PaginatedList<T>
     {
     }
 
+    public PaginatedList(IEnumerable<T>? items, bool hasNextPage = false)
+        : this(items, items?.Count() ?? 0, hasNextPage)
+    {
+    }
+
+    public PaginatedList(IEnumerable<T>? items, int totalCount)
+        : this(items, totalCount, totalCount > items?.Count())
+    {
+    }
+
+    public PaginatedList(IEnumerable<T>? items, int totalCount, bool hasNextPage)
+        : this(items, totalCount, 0, items?.Count() ?? 0, hasNextPage)
+    {
+    }
+
+    public PaginatedList(IEnumerable<T>? items, int totalCount, int pageIndex)
+        : this(items, totalCount, pageIndex, items?.Count() ?? 0)
+    {
+    }
+
     public PaginatedList(IEnumerable<T>? items, int totalCount, int pageIndex, int pageSize)
+        : this(items, totalCount, pageIndex, pageSize, totalCount > (pageIndex * pageSize) + (items?.Count() ?? 0))
+    {
+    }
+
+    public PaginatedList(IEnumerable<T>? items, int totalCount, int pageIndex, int pageSize, bool hasNextPage)
     {
         Items = items;
         TotalCount = totalCount;
         PageIndex = pageIndex;
         PageSize = pageSize;
-        HasNextPage = totalCount > (pageIndex * pageSize) + (items?.Count() ?? 0);
-    }
-
-    public PaginatedList(IEnumerable<T>? items, bool hasNextPage = false) : this(items, items?.Count() ?? 0, hasNextPage)
-    {
-    }
-
-    public PaginatedList(IEnumerable<T>? items, int totalCount, bool hasNextPage = false)
-    {
-        Items = items;
-        TotalCount = totalCount;
-        PageIndex = 0;
-        PageSize = items?.Count() ?? 0;
-        HasNextPage = items?.Count() != totalCount && hasNextPage;
+        HasNextPage = hasNextPage;
     }
 }
