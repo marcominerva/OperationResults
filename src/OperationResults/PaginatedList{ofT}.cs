@@ -22,7 +22,7 @@ public class PaginatedList<T>
     }
 
     public PaginatedList(IEnumerable<T>? items, int totalCount)
-        : this(items, totalCount, items?.Count() != totalCount)
+        : this(items, totalCount, totalCount > items?.Count())
     {
     }
 
