@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
@@ -9,7 +9,7 @@
         <Company>Marco Minerva</Company>
         <Product>OperationResults</Product>
         <Title>OperationResults</Title>
-        <Description>A lightweight library to totally decouple operation results and actual application responses..</Description>
+        <Description>A lightweight library to totally decouple operation results and actual application responses.</Description>
         <PackageId>OperationResultTools</PackageId>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/marcominerva/OperationResults</PackageProjectUrl>
