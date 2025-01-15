@@ -7,6 +7,8 @@ using OperationResults.Sample.BusinessLayer.Services;
 using OperationResults.Sample.BusinessLayer.Services.Interfaces;
 using OperationResults.Sample.DataAccessLayer;
 using OperationResults.Sample.Shared.Models;
+using TinyHelpers.AspNetCore.Extensions;
+using TinyHelpers.AspNetCore.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,10 +36,17 @@ builder.Services.AddOperationResult(options =>
     //options.MapStatusCodes = false;
 });
 
-builder.Services.AddProblemDetails();
+builder.Services.AddRequestLocalization("en", "it");
+
+builder.Services.AddDefaultProblemDetails();
+builder.Services.AddDefaultExceptionHandler();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddAcceptLanguageHeader();
+    options.AddDefaultResponse();
+});
 
 var app = builder.Build();
 
@@ -52,6 +61,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRequestLocalization();
 
 var peopleApi = app.MapGroup("api/people");
 

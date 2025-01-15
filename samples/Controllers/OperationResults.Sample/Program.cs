@@ -41,10 +41,14 @@ validationErrorMessageProvider: (state) => Messages.ValidationErrorMessage);    
 
 builder.Services.AddRequestLocalization("en", "it");
 
+builder.Services.AddDefaultProblemDetails();
+builder.Services.AddDefaultExceptionHandler();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddAcceptLanguageHeader();
+    options.AddDefaultResponse();
 });
 
 var app = builder.Build();
@@ -58,9 +62,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseRequestLocalization();
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
-app.UseAuthorization();
+app.UseRequestLocalization();
 
 app.MapControllers();
 
