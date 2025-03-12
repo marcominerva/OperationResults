@@ -48,7 +48,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddAcceptLanguageHeader();
-    options.AddDefaultResponse();
+    options.AddDefaultProblemDetailsResponse();
 });
 
 var app = builder.Build();
