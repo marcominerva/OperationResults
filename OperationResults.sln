@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 17
+# Visual Studio Version 17
 VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OperationResults", "src\OperationResults\OperationResults.csproj", "{A7A08C14-9A87-43CD-9D9F-4313C63E75DB}"
@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FB48579A-CE88-4537-AA7E-1AB752B9ED8C}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.github\copilot-instructions.md = .github\copilot-instructions.md
 		src\Directory.Build.props = src\Directory.Build.props
 	EndProjectSection
 EndProject
