@@ -6,7 +6,7 @@ using OperationResults.Sample.BusinessLayer.Services.Interfaces;
 using OperationResults.Sample.DataAccessLayer;
 using OperationResults.Sample.Resources;
 using TinyHelpers.AspNetCore.Extensions;
-using TinyHelpers.AspNetCore.Swagger;
+using TinyHelpers.AspNetCore.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,8 +44,7 @@ builder.Services.AddRequestLocalization("en", "it");
 builder.Services.AddDefaultProblemDetails();
 builder.Services.AddDefaultExceptionHandler();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddOpenApi(options =>
 {
     options.AddAcceptLanguageHeader();
     options.AddDefaultProblemDetailsResponse();
@@ -56,11 +55,12 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/openapi/v1.json", app.Environment.ApplicationName);
+});
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
