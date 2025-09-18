@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace OperationResults;
 
 public class Result : IGenericResult
@@ -7,6 +9,9 @@ public class Result : IGenericResult
     public int FailureReason { get; }
 
     public Exception? Error { get; }
+
+    [MemberNotNullWhen(true, nameof(ErrorMessage))]
+    public bool HasError => Error is not null;
 
     private readonly string? errorMessage;
     public string? ErrorMessage => errorMessage ?? Error?.Message;
@@ -32,10 +37,10 @@ public class Result : IGenericResult
     public static Result Fail(int failureReason, ValidationError validationError)
         => new(false, failureReason: failureReason, validationErrors: [validationError]);
 
-    public static Result Fail(int failureReason, string message, ValidationError validationError)
+    public static Result Fail(int failureReason, string? message, ValidationError validationError)
         => new(false, failureReason: failureReason, message: message, validationErrors: [validationError]);
 
-    public static Result Fail(int failureReason, string message, string detail, ValidationError validationError)
+    public static Result Fail(int failureReason, string? message, string? detail, ValidationError validationError)
         => new(false, failureReason: failureReason, message: message, detail: detail, validationErrors: [validationError]);
 
     public static Result Fail(int failureReason, Exception? error, ValidationError validationError)
@@ -44,10 +49,10 @@ public class Result : IGenericResult
     public static Result Fail(int failureReason, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, validationErrors: validationErrors);
 
-    public static Result Fail(int failureReason, string message, IEnumerable<ValidationError>? validationErrors = null)
+    public static Result Fail(int failureReason, string? message, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, message: message, validationErrors: validationErrors);
 
-    public static Result Fail(int failureReason, string message, string detail, IEnumerable<ValidationError>? validationErrors = null)
+    public static Result Fail(int failureReason, string? message, string? detail, IEnumerable<ValidationError>? validationErrors = null)
         => new(false, failureReason: failureReason, message: message, detail: detail, validationErrors: validationErrors);
 
     public static Result Fail(int failureReason, Exception? error, IEnumerable<ValidationError>? validationErrors = null)
