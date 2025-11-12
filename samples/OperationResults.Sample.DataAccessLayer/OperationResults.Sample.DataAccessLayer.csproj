@@ -8,4 +8,5 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     </ItemGroup>
+
 </Project>
