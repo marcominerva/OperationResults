@@ -74,8 +74,7 @@ peopleApi.MapGet("/", async (IPeopleService peopleService, HttpContext httpConte
     var response = httpContext.CreateResponse(result);  // Or result.ToResponse(httpContext)
     return response;
 })
-.Produces<IEnumerable<Person>>()
-.WithOpenApi();
+.Produces<IEnumerable<Person>>();
 
 peopleApi.MapGet("{id:guid}", async (Guid id, IPeopleService peopleService, HttpContext httpContext) =>
 {
@@ -87,8 +86,7 @@ peopleApi.MapGet("{id:guid}", async (Guid id, IPeopleService peopleService, Http
 })
 .Produces<Person>()
 .Produces(StatusCodes.Status404NotFound)
-.WithName("GetPerson")
-.WithOpenApi();
+.WithName("GetPerson");
 
 peopleApi.MapGet("{id:guid}/with-image", async (Guid id, IPeopleService peopleService, HttpContext httpContext) =>
 {
@@ -100,8 +98,7 @@ peopleApi.MapGet("{id:guid}/with-image", async (Guid id, IPeopleService peopleSe
 })
 .Produces<PersonWithImage>()
 .Produces(StatusCodes.Status404NotFound)
-.WithName("GetPersonWithImage")
-.WithOpenApi();
+.WithName("GetPersonWithImage");
 
 peopleApi.MapPost("/", async (Person person, IPeopleService peopleService, HttpContext httpContext) =>
 {
@@ -112,8 +109,7 @@ peopleApi.MapPost("/", async (Person person, IPeopleService peopleService, HttpC
     return response;
 })
 .Produces<Person>(StatusCodes.Status201Created)
-.ProducesProblem(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
-.WithOpenApi();
+.ProducesProblem(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json);
 
 peopleApi.MapDelete("{id:guid}", async (Guid id, IPeopleService peopleService, HttpContext httpContext) =>
 {
@@ -124,14 +120,12 @@ peopleApi.MapDelete("{id:guid}", async (Guid id, IPeopleService peopleService, H
     return response;
 })
 .Produces(StatusCodes.Status204NoContent)
-.Produces(StatusCodes.Status404NotFound)
-.WithOpenApi();
+.Produces(StatusCodes.Status404NotFound);
 
 app.MapGet("api/image", async (IImageService imageService, HttpContext httpContext)
     => httpContext.CreateResponse(await imageService.GetImageAsync())
 )
 .Produces<FileContentResult>(StatusCodes.Status200OK, contentType: MediaTypeNames.Application.Octet)
-.Produces(StatusCodes.Status404NotFound)
-.WithOpenApi();
+.Produces(StatusCodes.Status404NotFound);
 
 app.Run();
