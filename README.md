@@ -1,7 +1,7 @@
 # OperationResults
 
 [![Lint Code Base](https://github.com/marcominerva/OperationResults/actions/workflows/linter.yml/badge.svg)](https://github.com/marcominerva/OperationResults/actions/workflows/linter.yml)
-[![CodeQL](https://github.com/marcominerva/OperationResults/actions/workflows/codeql.yml/badge.svg)](https://github.com/marcominerva/OperationResults/actions/workflows/codeql.yml)
+[![CodeQL](https://github.com/marcominerva/OperationResults/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/marcominerva/OperationResults/actions/workflows/github-code-scanning/codeql)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/marcominerva/OperationResultTools/blob/master/LICENSE)
 
 A set of lightweight libraries to totally decouple operation results and actual application responses.
