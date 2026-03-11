@@ -13,11 +13,9 @@ public class Result : IGenericResult
     [MemberNotNullWhen(true, nameof(ErrorMessage))]
     public bool HasError => Error is not null;
 
-    private readonly string? errorMessage;
-    public string? ErrorMessage => errorMessage ?? Error?.Message;
+    public string? ErrorMessage => field ?? Error?.Message;
 
-    private readonly string? errorDetail;
-    public string? ErrorDetail => errorDetail ?? Error?.InnerException?.Message;
+    public string? ErrorDetail => field ?? Error?.InnerException?.Message;
 
     public IEnumerable<ValidationError>? ValidationErrors { get; }
 
@@ -25,8 +23,8 @@ public class Result : IGenericResult
     {
         Success = success;
         FailureReason = failureReason;
-        errorMessage = message;
-        errorDetail = detail;
+        ErrorMessage = message;
+        ErrorDetail = detail;
         Error = error;
         ValidationErrors = validationErrors;
     }
