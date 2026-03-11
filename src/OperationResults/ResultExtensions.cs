@@ -15,7 +15,7 @@ public static class ResultExtensions
     /// <param name="mapper">A function to transform the source content to the destination type.</param>
     /// <returns>A new <see cref="Result{TDestination}"/> with the mapped content or the original error information.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="mapper"/> is <see langword="null"/>.</exception>
-    public static Result<TDestination> MapContent<TSource, TDestination>(this Result<TSource> source, Func<TSource, TDestination> mapper)
+    public static Result<TDestination> Map<TSource, TDestination>(this Result<TSource> source, Func<TSource, TDestination> mapper)
     {
         ArgumentNullException.ThrowIfNull(mapper);
 
@@ -39,7 +39,7 @@ public static class ResultExtensions
     /// <param name="mapper">A function to transform each item from the source type to the destination type.</param>
     /// <returns>A new <see cref="Result{T}"/> of <see cref="PaginatedList{TDestination}"/> with the mapped items or the original error information.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="mapper"/> is <see langword="null"/>.</exception>
-    public static Result<PaginatedList<TDestination>> MapPaginatedContent<TSource, TDestination>(this Result<PaginatedList<TSource>> source, Func<TSource, TDestination> mapper)
+    public static Result<PaginatedList<TDestination>> MapPaginated<TSource, TDestination>(this Result<PaginatedList<TSource>> source, Func<TSource, TDestination> mapper)
     {
         ArgumentNullException.ThrowIfNull(mapper);
 
