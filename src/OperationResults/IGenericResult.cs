@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace OperationResults;
+﻿namespace OperationResults;
 
 /// <summary>
 /// Exposes the transport-neutral metadata shared by all operation results.
@@ -28,8 +26,7 @@ public interface IGenericResult
     /// <summary>
     /// Gets a value indicating whether the result carries an exception for diagnostic purposes.
     /// </summary>
-    [MemberNotNullWhen(true, nameof(ErrorMessage))]
-    bool HasError => Error is not null;
+    bool HasError { get; }
 
     /// <summary>
     /// Gets optional low-level diagnostic detail that can help logs or problem responses explain the failure cause.
