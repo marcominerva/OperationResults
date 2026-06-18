@@ -72,8 +72,6 @@ var peopleApi = app.MapGroup("api/people");
 
 peopleApi.MapGet("/", async (IPeopleService peopleService, HttpContext httpContext) =>
 {
-    throw new Exception();
-
     // You can collapse the following instructions into a single one.
     var result = await peopleService.GetAsync();
 
