@@ -350,3 +350,5 @@ MigrationBackup/
 .ionide/
 
 /src/OperationResults/OperationResults.xml
+/src/OperationResults.AspNetCore/OperationResults.AspNetCore.xml
+/src/OperationResults.AspNetCore.Http/OperationResults.AspNetCore.Http.xml
