@@ -4,6 +4,7 @@
         <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <DocumentationFile>OperationResults.AspNetCore.Http.xml</DocumentationFile>
         <Authors>Marco Minerva</Authors>
         <Company>Marco Minerva</Company>
         <Product>OperationResultTools.AspNetCore.Http</Product>
@@ -19,13 +20,17 @@
         <RepositoryBranch>master</RepositoryBranch>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-
+    
+    <ItemGroup>
+        <None Remove="OperationResults.AspNetCore.Http.xml" />
+    </ItemGroup>
+    
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
 
     <ItemGroup>        
-        <PackageReference Include="OperationResultTools" Version="1.0.37" />
+        <PackageReference Include="OperationResultTools" Version="1.0.39" />
     </ItemGroup>
 
     <ItemGroup>

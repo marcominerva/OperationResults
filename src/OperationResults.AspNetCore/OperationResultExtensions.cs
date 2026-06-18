@@ -6,8 +6,21 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OperationResults.AspNetCore;
 
+/// <summary>
+/// Provides extension methods that convert operation results into ASP.NET Core <see cref="IActionResult"/> instances.
+/// </summary>
+/// <remarks>
+/// These methods are the controller-based adapter between transport-neutral business results and HTTP responses. They centralize status-code mapping, problem details creation, validation error formatting, and file-result handling so controller actions can stay focused on orchestration.
+/// </remarks>
 public static class OperationResultExtensions
 {
+    /// <summary>
+    /// Converts a non-generic operation result into an ASP.NET Core response.
+    /// </summary>
+    /// <param name="result">The operation result to translate.</param>
+    /// <param name="httpContext">The current HTTP context used to resolve response-mapping services and request metadata.</param>
+    /// <param name="successStatusCode">The status code to use when <paramref name="result"/> succeeds; the default is <see cref="StatusCodes.Status204NoContent"/>.</param>
+    /// <returns>An <see cref="IActionResult"/> that represents the operation outcome.</returns>
     public static IActionResult ToResponse(this Result result, HttpContext httpContext, int? successStatusCode = null)
     {
         if (result.Success)
@@ -18,6 +31,15 @@ public static class OperationResultExtensions
         return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
     }
 
+    /// <summary>
+    /// Converts a non-generic operation result into an ASP.NET Core route-based response when it succeeds, or a problem response when it fails.
+    /// </summary>
+    /// <param name="result">The operation result to translate.</param>
+    /// <param name="httpContext">The current HTTP context used to resolve response-mapping services and request metadata.</param>
+    /// <param name="routeName">The route name used to build the location of the created resource.</param>
+    /// <param name="routeValues">The route values used with <paramref name="routeName"/>.</param>
+    /// <param name="successStatusCode">The status code to use when <paramref name="result"/> succeeds; the default is <see cref="StatusCodes.Status201Created"/>.</param>
+    /// <returns>An <see cref="IActionResult"/> that represents the operation outcome.</returns>
     public static IActionResult ToResponse(this Result result, HttpContext httpContext, string? routeName, object? routeValues = null, int? successStatusCode = null)
     {
         if (result.Success)
@@ -33,9 +55,30 @@ public static class OperationResultExtensions
         return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
     }
 
+    /// <summary>
+    /// Converts a typed operation result into an ASP.NET Core response.
+    /// </summary>
+    /// <typeparam name="T">The type of content carried by the operation result.</typeparam>
+    /// <param name="result">The operation result to translate.</param>
+    /// <param name="httpContext">The current HTTP context used to resolve response-mapping services and request metadata.</param>
+    /// <param name="successStatusCode">The status code to use when <paramref name="result"/> succeeds; the default is <see cref="StatusCodes.Status200OK"/> when content exists or <see cref="StatusCodes.Status204NoContent"/> when it does not.</param>
+    /// <returns>An <see cref="IActionResult"/> that represents the operation outcome.</returns>
     public static IActionResult ToResponse<T>(this Result<T> result, HttpContext httpContext, int? successStatusCode = null)
         => result.ToResponse(httpContext, null, null, successStatusCode);
 
+    /// <summary>
+    /// Converts a typed operation result into an ASP.NET Core response, using route metadata for successful create-style responses when supplied.
+    /// </summary>
+    /// <typeparam name="T">The type of content carried by the operation result.</typeparam>
+    /// <param name="result">The operation result to translate.</param>
+    /// <param name="httpContext">The current HTTP context used to resolve response-mapping services and request metadata.</param>
+    /// <param name="routeName">The route name used to build the location of the created resource.</param>
+    /// <param name="routeValues">The route values used with <paramref name="routeName"/>.</param>
+    /// <param name="successStatusCode">The status code to use when <paramref name="result"/> succeeds; defaults depend on whether content, route metadata, or file content is present.</param>
+    /// <returns>An <see cref="IActionResult"/> that represents the operation outcome.</returns>
+    /// <remarks>
+    /// Successful file content is converted to <see cref="FileStreamResult"/> or <see cref="FileContentResult"/> so business services can return <see cref="StreamFileContent"/> or <see cref="ByteArrayFileContent"/> without referencing ASP.NET Core MVC types.
+    /// </remarks>
     public static IActionResult ToResponse<T>(this Result<T> result, HttpContext httpContext, string? routeName, object? routeValues = null, int? successStatusCode = null)
     {
         if (result.Success)

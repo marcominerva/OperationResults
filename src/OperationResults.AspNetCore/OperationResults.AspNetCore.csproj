@@ -4,6 +4,7 @@
         <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <DocumentationFile>OperationResults.AspNetCore.xml</DocumentationFile>
         <Authors>Marco Minerva</Authors>
         <Company>Marco Minerva</Company>
         <Product>OperationResults.AspNetCore</Product>
@@ -21,11 +22,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <None Remove="OperationResults.AspNetCore.xml" />
+    </ItemGroup>
+    
+    <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
 
     <ItemGroup>        
-        <PackageReference Include="OperationResultTools" Version="1.0.37" />
+        <PackageReference Include="OperationResultTools" Version="1.0.39" />
     </ItemGroup>
 
     <ItemGroup>
