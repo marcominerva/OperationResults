@@ -69,6 +69,23 @@ public class PeopleService(ApplicationDbContext dbContext, IImageService imageSe
 }
 ```
 
+`Result<T>` can be returned directly from a value when the operation succeeds, and `Result.Fail` can be used when the operation needs to carry a failure reason, a message, and optional validation errors. This keeps application services focused on business outcomes instead of HTTP response types.
+
+You can also inspect a result without throwing exceptions:
+
+```csharp
+var result = await peopleService.GetAsync(id);
+
+if (result.TryGetContent(out var person))
+{
+    Console.WriteLine($"Loaded {person.FirstName} {person.LastName}");
+}
+else if (result.HasError)
+{
+    Console.WriteLine(result.ErrorMessage);
+}
+```
+
 The same pattern also works for file results or other payloads:
 
 ```csharp
@@ -159,6 +176,35 @@ public class ImageController(IImageService imageService) : ControllerBase
 }
 ```
 
+**Configuration**
+
+Register the controller adapter once at startup. You can keep the default mapping between `FailureReasons` and HTTP status codes, add custom failure reasons, or decide to use failure reasons directly as HTTP status codes:
+
+```csharp
+builder.Services.AddOperationResult(options =>
+{
+    options.ErrorResponseFormat = ErrorResponseFormat.Default;
+    options.StatusCodesMapping.Add(CustomFailureReasons.NotAvailable, StatusCodes.Status501NotImplemented);
+
+    // If your application uses HTTP status codes directly as failure reasons:
+    // options.MapStatusCodes = false;
+
+    // If a failure reason is not mapped, use a fallback status code.
+    options.UnmappedFailureReasonBehavior = UnmappedFailureReasonBehavior.UseDefaultStatusCode;
+    options.UnmappedFailureReasonStatusCode = StatusCodes.Status501NotImplemented;
+});
+```
+
+Controller-based projects can also opt in to operation-result-style automatic model-state validation responses:
+
+```csharp
+builder.Services.AddOperationResult(
+    options => options.ErrorResponseFormat = ErrorResponseFormat.List,
+    validationErrorDefaultMessage: "The submitted data is invalid");
+```
+
+When this option is used, invalid model-state responses are emitted as `application/problem+json` and reuse the configured validation error format.
+
 ## ASP.NET Core integration library (Minimal API projects)
 
 [![NuGet](https://img.shields.io/nuget/v/OperationResultTools.AspNetCore.Http.svg?style=flat-square)](https://www.nuget.org/packages/OperationResultTools.AspNetCore.Http)
@@ -188,6 +234,10 @@ builder.Services.AddOperationResult(options =>
 
     // If you want to use failure reasons directly as HTTP status codes:
     // options.MapStatusCodes = false;
+
+    // If a failure reason is not mapped, use a fallback status code.
+    options.UnmappedFailureReasonBehavior = UnmappedFailureReasonBehavior.UseDefaultStatusCode;
+    options.UnmappedFailureReasonStatusCode = StatusCodes.Status501NotImplemented;
 });
 ```
 
@@ -220,6 +270,21 @@ peopleApi.MapPost("/", async (Person person, IPeopleService peopleService, HttpC
 .Produces<Person>(StatusCodes.Status201Created)
 .ProducesProblem(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json);
 ```
+
+Minimal API endpoints can return non-generic results as well. Successful non-generic results are translated to `204 No Content` by default, while failures are translated to problem details using the configured status-code mapping:
+
+```csharp
+peopleApi.MapDelete("{id:guid}", async (Guid id, IPeopleService peopleService, HttpContext httpContext) =>
+{
+    var result = await peopleService.DeleteAsync(id);
+    return httpContext.CreateResponse(result);
+})
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status403Forbidden)
+.Produces(StatusCodes.Status404NotFound);
+```
+
+If a service returns content together with a failure, the adapter returns that content with the mapped failure status code instead of creating a problem details response. This is useful for partial results or domain-specific error payloads.
 
 The same mechanism can also return files:
 
