@@ -109,11 +109,6 @@ peopleApi.MapPost("/", async (Person person, IPeopleService peopleService, HttpC
     // You can collapse the following instructions into a single one.
     var result = await peopleService.SaveAsync(person);
 
-    if (result.HasError)
-    {
-        Console.WriteLine(result.Error.ToString());
-    }
-
     var response = httpContext.CreateResponse(result, "GetPerson", new { id = result.Content?.Id });  // Or result.ToResponse(httpContext, nameof(GetPerson), new { id = result.Content?.Id });
     return response;
 })
