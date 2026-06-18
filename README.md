@@ -17,6 +17,76 @@ The library is available on [NuGet](https://www.nuget.org/packages/OperationResu
 
     dotnet add package OperationResultTools
 
+**Usage example**
+
+The core library can be used in your business layer to return successful or failed results without referencing ASP.NET Core types.
+
+```csharp
+public class PeopleService(ApplicationDbContext dbContext, IImageService imageService) : IPeopleService
+{
+    public async Task<Result<Person>> GetAsync(Guid id)
+    {
+        var dbPerson = await dbContext.People.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+        if (dbPerson is null)
+        {
+            return Result.Fail(FailureReasons.ItemNotFound);
+        }
+
+        var person = new Person
+        {
+            Id = dbPerson.Id,
+            FirstName = dbPerson.FirstName,
+            LastName = dbPerson.LastName,
+            Email = dbPerson.Email,
+            City = dbPerson.City
+        };
+
+        return person;
+    }
+
+    public async Task<Result<Person>> SaveAsync(Person person)
+    {
+        var samePersonExists = await dbContext.People
+            .AnyAsync(p => p.FirstName == person.FirstName && p.LastName == person.LastName
+                && p.CreateDate.AddMinutes(1) > DateTime.UtcNow);
+
+        if (samePersonExists)
+        {
+            var validationErrors = new List<ValidationError>
+            {
+                new("FirstName", "First name already in use"),
+                new("LastName", "Last name already in use")
+            };
+
+            return Result.Fail(
+                FailureReasons.ClientError,
+                "Unable to create a person with same first name and last name within 1 minute",
+                validationErrors);
+        }
+
+        return person;
+    }
+}
+```
+
+The same pattern also works for file results or other payloads:
+
+```csharp
+public class ImageService : IImageService
+{
+    public async Task<Result<ByteArrayFileContent>> GetImageAsync()
+    {
+        if (!File.Exists(@"D:\Taggia.jpg"))
+        {
+            return Result.Fail(FailureReasons.ItemNotFound);
+        }
+
+        var content = await File.ReadAllBytesAsync(@"D:\Taggia.jpg");
+        return new ByteArrayFileContent(content, "image/jpg");
+    }
+}
+```
+
 ## ASP.NET Core integration library (Controller-based projects)
 
 [![NuGet](https://img.shields.io/nuget/v/OperationResultTools.AspNetCore.svg?style=flat-square)](https://www.nuget.org/packages/OperationResultTools.AspNetCore)
@@ -34,6 +104,61 @@ The library is available on [NuGet](https://www.nuget.org/packages/OperationResu
 
     dotnet add package OperationResultTools.AspNetCore
 
+**Usage example**
+
+Once the package is registered, your controllers can delegate the HTTP response generation to `HttpContext.CreateResponse`.
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+[Produces(MediaTypeNames.Application.Json)]
+public class PeopleController(IPeopleService peopleService) : ControllerBase
+{
+    [HttpGet("{id:guid}", Name = nameof(GetPerson))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Person))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPerson(Guid id)
+    {
+        var result = await peopleService.GetAsync(id);
+        return HttpContext.CreateResponse(result);
+    }
+
+    [HttpPost]
+    [ProducesResponseType<Person>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Save(Person person)
+    {
+        var result = await peopleService.SaveAsync(person);
+        return HttpContext.CreateResponse(result, nameof(GetPerson), new { id = result.Content?.Id });
+    }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var result = await peopleService.DeleteAsync(id);
+        return HttpContext.CreateResponse(result);
+    }
+}
+```
+
+This approach also works for binary responses:
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class ImageController(IImageService imageService) : ControllerBase
+{
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetImage()
+        => HttpContext.CreateResponse(await imageService.GetImageAsync());
+}
+```
+
 ## ASP.NET Core integration library (Minimal API projects)
 
 [![NuGet](https://img.shields.io/nuget/v/OperationResultTools.AspNetCore.Http.svg?style=flat-square)](https://www.nuget.org/packages/OperationResultTools.AspNetCore.Http)
@@ -50,6 +175,63 @@ A full sample is available in the [Samples folder](https://github.com/marcominer
 The library is available on [NuGet](https://www.nuget.org/packages/OperationResultTools.AspNetCore.Http). Just search for *OperationResultTools.AspNetCore.Http* in the **Package Manager GUI** or run the following command in the **.NET CLI**:
 
     dotnet add package OperationResultTools.AspNetCore.Http
+
+**Usage example**
+
+Register the library in your Minimal API application and customize the mapping between operation failures and HTTP status codes:
+
+```csharp
+builder.Services.AddOperationResult(options =>
+{
+    options.ErrorResponseFormat = ErrorResponseFormat.Default;
+    options.StatusCodesMapping.Add(CustomFailureReasons.NotAvailable, StatusCodes.Status501NotImplemented);
+
+    // If you want to use failure reasons directly as HTTP status codes:
+    // options.MapStatusCodes = false;
+});
+```
+
+Then convert results returned by your services into HTTP responses inside your endpoints:
+
+```csharp
+var peopleApi = app.MapGroup("api/people");
+
+peopleApi.MapGet("/", async (IPeopleService peopleService, HttpContext httpContext) =>
+{
+    var result = await peopleService.GetAsync();
+    return httpContext.CreateResponse(result);
+})
+.Produces<IEnumerable<Person>>();
+
+peopleApi.MapGet("{id:guid}", async (Guid id, IPeopleService peopleService, HttpContext httpContext) =>
+{
+    var result = await peopleService.GetAsync(id);
+    return httpContext.CreateResponse(result);
+})
+.Produces<Person>()
+.Produces(StatusCodes.Status404NotFound)
+.WithName("GetPerson");
+
+peopleApi.MapPost("/", async (Person person, IPeopleService peopleService, HttpContext httpContext) =>
+{
+    var result = await peopleService.SaveAsync(person);
+    return httpContext.CreateResponse(result, "GetPerson", new { id = result.Content?.Id });
+})
+.Produces<Person>(StatusCodes.Status201Created)
+.ProducesProblem(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json);
+```
+
+The same mechanism can also return files:
+
+```csharp
+app.MapGet("api/image", async (IImageService imageService, HttpContext httpContext)
+    => httpContext.CreateResponse(await imageService.GetImageAsync())
+)
+.Produces<FileContentResult>(StatusCodes.Status200OK, contentType: MediaTypeNames.Application.Octet)
+.Produces(StatusCodes.Status404NotFound);
+```
+
+In this way, the business layer remains completely decoupled from ASP.NET Core, while the web layer consistently translates `Result` and `Result<T>` instances into HTTP responses.
 
 
 **Contribute**

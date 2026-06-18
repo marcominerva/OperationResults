@@ -4,6 +4,7 @@
         <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <DocumentationFile>OperationResults.xml</DocumentationFile>
         <LangVersion>latest</LangVersion>
         <Authors>Marco Minerva</Authors>
         <Company>Marco Minerva</Company>
@@ -20,6 +21,10 @@
         <RepositoryBranch>master</RepositoryBranch>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Remove="OperationResults.xml" />
+    </ItemGroup>
 
     <ItemGroup>
         <None Include="..\..\Toolbox.png">
