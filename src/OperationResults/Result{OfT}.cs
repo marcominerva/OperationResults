@@ -26,6 +26,11 @@ public class Result<T> : IGenericResult<T>
     public Exception? Error { get; }
 
     /// <inheritdoc />
+    [MemberNotNullWhen(true, nameof(Error))]
+    [MemberNotNullWhen(true, nameof(ErrorMessage))]
+    public bool HasError => Error is not null;
+
+    /// <inheritdoc />
     public string? ErrorMessage => field ?? Error?.Message;
 
     /// <inheritdoc />
