@@ -1,6 +1,8 @@
 using System.Net.Mime;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OperationResults;
 using OperationResults.AspNetCore.Http;
 using OperationResults.Sample.BusinessLayer;
 using OperationResults.Sample.BusinessLayer.Services;
@@ -47,6 +49,8 @@ builder.Services.AddOpenApi(options =>
     options.AddDefaultProblemDetailsResponse();
 });
 
+builder.Services.AddScoped<TestService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -68,6 +72,8 @@ var peopleApi = app.MapGroup("api/people");
 
 peopleApi.MapGet("/", async (IPeopleService peopleService, HttpContext httpContext) =>
 {
+    throw new Exception();
+
     // You can collapse the following instructions into a single one.
     var result = await peopleService.GetAsync();
 
@@ -109,7 +115,7 @@ peopleApi.MapPost("/", async (Person person, IPeopleService peopleService, HttpC
     return response;
 })
 .Produces<Person>(StatusCodes.Status201Created)
-.ProducesProblem(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json);
+.ProducesProblem(StatusCodes.Status400BadRequest);
 
 peopleApi.MapDelete("{id:guid}", async (Guid id, IPeopleService peopleService, HttpContext httpContext) =>
 {
@@ -128,4 +134,27 @@ app.MapGet("api/image", async (IImageService imageService, HttpContext httpConte
 .Produces<FileContentResult>(StatusCodes.Status200OK, contentType: MediaTypeNames.Application.Octet)
 .Produces(StatusCodes.Status404NotFound);
 
+app.MapGet("api/test", async (bool notFound, HttpContext httpContext, TestService testService) =>
+    {
+        var result = testService.CreateSampleData(notFound);
+        return result.ToResponse(httpContext);
+    }
+)
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound);
+
 app.Run();
+
+public class TestService
+{
+    public Result<JsonElement> CreateSampleData(bool notFound)
+    {
+        if (notFound)
+        {
+            return Result.Fail(FailureReasons.ItemNotFound);
+        }
+
+        using var jsonDocument = JsonDocument.Parse("""{"name":"test"}""");
+        return jsonDocument.RootElement.Clone();
+    }
+}

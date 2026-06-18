@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -67,7 +68,7 @@ public static class OperationResultExtensions
         var options = httpContext.RequestServices.GetService<OperationResultOptions>() ?? new OperationResultOptions();
         var statusCode = options.MapStatusCodes ? options.GetStatusCode(failureReason) : failureReason;
 
-        if (content is not null)
+        if (HasValidContent(content))
         {
             return TypedResults.Json(content, statusCode: statusCode);
         }
@@ -100,4 +101,12 @@ public static class OperationResultExtensions
 
         return problemResult;
     }
+
+    private static bool HasValidContent(object? content)
+        => content switch
+        {
+            null => false,
+            JsonElement { ValueKind: JsonValueKind.Undefined } => false,
+            _ => true
+        };
 }
