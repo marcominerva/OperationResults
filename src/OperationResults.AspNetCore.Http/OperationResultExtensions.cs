@@ -47,7 +47,7 @@ public static class OperationResultExtensions
         if (result.Success)
         {
             var routeValueDictionary = new RouteValueDictionary(routeValues);
-            return TypedResults.CreatedAtRoute(routeName, routeValues);
+            return TypedResults.CreatedAtRoute(routeName, routeValueDictionary);
         }
 
         return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
@@ -86,7 +86,7 @@ public static class OperationResultExtensions
                 if (!string.IsNullOrWhiteSpace(routeName))
                 {
                     var routeValueDictionary = new RouteValueDictionary(routeValues);
-                    return TypedResults.CreatedAtRoute(result.Content, routeName, routeValues);
+                    return TypedResults.CreatedAtRoute(result.Content, routeName, routeValueDictionary);
                 }
                 else if (result.Content is StreamFileContent streamFileContent)
                 {
