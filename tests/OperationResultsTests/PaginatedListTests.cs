@@ -2,526 +2,175 @@ using OperationResults;
 
 namespace OperationResultsTests;
 
-public class OperationResultsTests
+public class PaginatedListTests
 {
     [Fact]
-    public void PaginatedList_DefaultConstructor_ItemsIsNull()
+    public void DefaultConstructor_UsesDefaultValues()
     {
-        // Arrange
-        var paginatedList = new PaginatedList<int>();
+        var result = new PaginatedList<int>();
 
-        // Act
+        Assert.Null(result.Items);
+        Assert.Equal(0, result.PageIndex);
+        Assert.Equal(0, result.PageSize);
+        Assert.Equal(0, result.TotalCount);
+        Assert.False(result.HasNextPage);
+    }
 
-        // Assert
-        Assert.Null(paginatedList.Items);
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ItemsConstructor_InfersCountsAndPreservesContinuation(bool hasNextPage)
+    {
+        int[] items = [1, 2, 3];
+
+        var result = new PaginatedList<int>(items, hasNextPage);
+
+        Assert.Same(items, result.Items);
+        Assert.Equal(0, result.PageIndex);
+        Assert.Equal(3, result.PageSize);
+        Assert.Equal(3, result.TotalCount);
+        Assert.Equal(hasNextPage, result.HasNextPage);
     }
 
     [Fact]
-    public void PaginatedList_DefaultConstructor_PageIndexIsZero()
+    public void ItemsConstructor_WithNullItems_UsesZeroCounts()
     {
-        // Arrange
-        var paginatedList = new PaginatedList<int>();
+        var result = new PaginatedList<int>(null);
 
-        // Act
-
-        // Assert
-        Assert.Equal(0, paginatedList.PageIndex);
+        Assert.Null(result.Items);
+        Assert.Equal(0, result.PageSize);
+        Assert.Equal(0, result.TotalCount);
+        Assert.False(result.HasNextPage);
     }
 
     [Fact]
-    public void PaginatedList_DefaultConstructor_PageSizeIsZero()
+    public void ItemsConstructor_WithEmptyItems_PreservesEmptyCollection()
     {
-        // Arrange
-        var paginatedList = new PaginatedList<int>();
+        int[] items = [];
 
-        // Act
+        var result = new PaginatedList<int>(items);
 
-        // Assert
-        Assert.Equal(0, paginatedList.PageSize);
+        Assert.Same(items, result.Items);
+        Assert.Equal(0, result.PageSize);
+        Assert.Equal(0, result.TotalCount);
+        Assert.False(result.HasNextPage);
+    }
+
+    [Theory]
+    [InlineData(4, true)]
+    [InlineData(3, false)]
+    [InlineData(2, false)]
+    public void ItemsAndTotalCountConstructor_InfersContinuation(int totalCount, bool expectedHasNextPage)
+    {
+        int[] items = [1, 2, 3];
+
+        var result = new PaginatedList<int>(items, totalCount);
+
+        Assert.Same(items, result.Items);
+        Assert.Equal(3, result.PageSize);
+        Assert.Equal(totalCount, result.TotalCount);
+        Assert.Equal(expectedHasNextPage, result.HasNextPage);
     }
 
     [Fact]
-    public void PaginatedList_DefaultConstructor_TotalCountIsZero()
+    public void ItemsAndTotalCountConstructor_WithNullItems_DoesNotInferContinuation()
     {
-        // Arrange
-        var paginatedList = new PaginatedList<int>();
+        var result = new PaginatedList<int>(null, 10);
 
-        // Act
+        Assert.Null(result.Items);
+        Assert.Equal(0, result.PageSize);
+        Assert.Equal(10, result.TotalCount);
+        Assert.False(result.HasNextPage);
+    }
 
-        // Assert
-        Assert.Equal(0, paginatedList.TotalCount);
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ItemsTotalCountAndHasNextPageConstructor_PreservesMetadata(bool hasNextPage)
+    {
+        int[] items = [1, 2];
+
+        var result = new PaginatedList<int>(items, 10, hasNextPage);
+
+        Assert.Same(items, result.Items);
+        Assert.Equal(0, result.PageIndex);
+        Assert.Equal(2, result.PageSize);
+        Assert.Equal(10, result.TotalCount);
+        Assert.Equal(hasNextPage, result.HasNextPage);
+    }
+
+    [Theory]
+    [InlineData(7, 1, true)]
+    [InlineData(6, 1, false)]
+    [InlineData(3, 0, false)]
+    public void ItemsTotalCountAndPageIndexConstructor_InfersMetadata(int totalCount, int pageIndex, bool expectedHasNextPage)
+    {
+        int[] items = [1, 2, 3];
+
+        var result = new PaginatedList<int>(items, totalCount, pageIndex);
+
+        Assert.Same(items, result.Items);
+        Assert.Equal(pageIndex, result.PageIndex);
+        Assert.Equal(3, result.PageSize);
+        Assert.Equal(totalCount, result.TotalCount);
+        Assert.Equal(expectedHasNextPage, result.HasNextPage);
     }
 
     [Fact]
-    public void PaginatedList_DefaultConstructor_HasNextPageIsFalse()
+    public void ItemsTotalCountAndPageIndexConstructor_WithNullItems_UsesZeroPageSize()
     {
-        // Arrange
-        var paginatedList = new PaginatedList<int>();
+        var result = new PaginatedList<int>(null, 10, 2);
 
-        // Act
+        Assert.Null(result.Items);
+        Assert.Equal(2, result.PageIndex);
+        Assert.Equal(0, result.PageSize);
+        Assert.Equal(10, result.TotalCount);
+        Assert.True(result.HasNextPage);
+    }
 
-        // Assert
-        Assert.False(paginatedList.HasNextPage);
+    [Theory]
+    [InlineData(11, 1, 5, 3, true)]
+    [InlineData(8, 1, 5, 3, false)]
+    [InlineData(10, 1, 5, 0, true)]
+    public void ItemsTotalCountPageIndexAndPageSizeConstructor_InfersContinuation(
+        int totalCount, int pageIndex, int pageSize, int itemCount, bool expectedHasNextPage)
+    {
+        var items = Enumerable.Range(1, itemCount).ToArray();
+
+        var result = new PaginatedList<int>(items, totalCount, pageIndex, pageSize);
+
+        Assert.Same(items, result.Items);
+        Assert.Equal(pageIndex, result.PageIndex);
+        Assert.Equal(pageSize, result.PageSize);
+        Assert.Equal(totalCount, result.TotalCount);
+        Assert.Equal(expectedHasNextPage, result.HasNextPage);
     }
 
     [Fact]
-    public void PaginatedList_ItemsConstructor_ItemsSetCorrectly()
+    public void ItemsTotalCountPageIndexAndPageSizeConstructor_WithNullItems_InfersContinuation()
     {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items);
+        var result = new PaginatedList<int>(null, 11, 1, 5);
 
-        // Act
-
-        // Assert
-        Assert.Equal(items, paginatedList.Items);
+        Assert.Null(result.Items);
+        Assert.Equal(1, result.PageIndex);
+        Assert.Equal(5, result.PageSize);
+        Assert.Equal(11, result.TotalCount);
+        Assert.True(result.HasNextPage);
     }
 
-    [Fact]
-    public void PaginatedList_ItemsConstructor_PageIndexIsZero()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FullConstructor_PreservesAllValues(bool hasNextPage)
     {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items);
-
-        // Act
-
-        // Assert
-        Assert.Equal(0, paginatedList.PageIndex);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsConstructor_PageSizeIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.PageSize);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsConstructor_TotalCountIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.TotalCount);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsConstructor_HasNextPageIsFalse()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items);
-
-        // Act
-
-        // Assert
-        Assert.False(paginatedList.HasNextPage);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsAndHasNextPageConstructor_ItemsSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items, paginatedList.Items);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsAndHasNextPageConstructor_PageIndexIsZero()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(0, paginatedList.PageIndex);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsAndHasNextPageConstructor_PageSizeIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.PageSize);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsAndHasNextPageConstructor_TotalCountIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.TotalCount);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsAndHasNextPageConstructor_HasNextPageIsTrue()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, true);
-
-        // Act
-
-        // Assert
-        Assert.True(paginatedList.HasNextPage);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsAndTotalCountConstructor_ItemsSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items, paginatedList.Items);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsAndTotalCountConstructor_PageIndexIsZero()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count);
-
-        // Act
-
-        // Assert
-        Assert.Equal(0, paginatedList.PageIndex);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsAndTotalCountConstructor_PageSizeIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.PageSize);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsAndTotalCountConstructor_TotalCountIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.TotalCount);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsAndTotalCountConstructor_HasNextPageIsFalse()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count);
-
-        // Act
-
-        // Assert
-        Assert.False(paginatedList.HasNextPage);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountAndHasNextPageConstructor_ItemsSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items, paginatedList.Items);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountAndHasNextPageConstructor_PageIndexIsZero()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(0, paginatedList.PageIndex);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountAndHasNextPageConstructor_PageSizeIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.PageSize);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountAndHasNextPageConstructor_TotalCountIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.TotalCount);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountAndHasNextPageConstructor_HasNextPageIsTrue()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, true);
-
-        // Act
-
-        // Assert
-        Assert.True(paginatedList.HasNextPage);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexConstructor_ItemsSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items, paginatedList.Items);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexConstructor_PageIndexSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var pageIndex = 1;
-        var paginatedList = new PaginatedList<int>(items, items.Count, pageIndex);
-
-        // Act
-
-        // Assert
-        Assert.Equal(pageIndex, paginatedList.PageIndex);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexConstructor_PageSizeIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.PageSize);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexConstructor_TotalCountIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.TotalCount);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexConstructor_HasNextPageIsFalse()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1);
-
-        // Act
-
-        // Assert
-        Assert.False(paginatedList.HasNextPage);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexPageSizeConstructor_ItemsSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1, 10);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items, paginatedList.Items);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexPageSizeConstructor_PageIndexSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var pageIndex = 1;
-        var paginatedList = new PaginatedList<int>(items, items.Count, pageIndex, 10);
-
-        // Act
-
-        // Assert
-        Assert.Equal(pageIndex, paginatedList.PageIndex);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexPageSizeConstructor_PageSizeSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var pageSize = 10;
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1, pageSize);
-
-        // Act
-
-        // Assert
-        Assert.Equal(pageSize, paginatedList.PageSize);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexPageSizeConstructor_TotalCountIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1, 10);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.TotalCount);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexPageSizeConstructor_HasNextPageIsFalse()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1, 10);
-
-        // Act
-
-        // Assert
-        Assert.False(paginatedList.HasNextPage);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexPageSizeHasNextPageConstructor_ItemsSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1, 10, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items, paginatedList.Items);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexPageSizeHasNextPageConstructor_PageIndexSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var pageIndex = 1;
-        var paginatedList = new PaginatedList<int>(items, items.Count, pageIndex, 10, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(pageIndex, paginatedList.PageIndex);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexPageSizeHasNextPageConstructor_PageSizeSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var pageSize = 10;
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1, pageSize, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(pageSize, paginatedList.PageSize);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexPageSizeHasNextPageConstructor_TotalCountIsItemCount()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1, 10, true);
-
-        // Act
-
-        // Assert
-        Assert.Equal(items.Count, paginatedList.TotalCount);
-    }
-
-    [Fact]
-    public void PaginatedList_ItemsTotalCountPageIndexPageSizeHasNextPageConstructor_HasNextPageSetCorrectly()
-    {
-        // Arrange
-        var items = new List<int> { 1, 2, 3 };
-        var hasNextPage = true;
-        var paginatedList = new PaginatedList<int>(items, items.Count, 1, 10, hasNextPage);
-
-        // Act
-
-        // Assert
-        Assert.Equal(hasNextPage, paginatedList.HasNextPage);
+        int[] items = [1, 2];
+
+        var result = new PaginatedList<int>(items, 25, 2, 10, hasNextPage);
+
+        Assert.Same(items, result.Items);
+        Assert.Equal(25, result.TotalCount);
+        Assert.Equal(2, result.PageIndex);
+        Assert.Equal(10, result.PageSize);
+        Assert.Equal(hasNextPage, result.HasNextPage);
     }
 }

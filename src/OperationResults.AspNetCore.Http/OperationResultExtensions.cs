@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -46,7 +45,6 @@ public static class OperationResultExtensions
     {
         if (result.Success)
         {
-            var routeValueDictionary = new RouteValueDictionary(routeValues);
             return TypedResults.CreatedAtRoute(routeName, routeValues);
         }
 
@@ -85,7 +83,6 @@ public static class OperationResultExtensions
             {
                 if (!string.IsNullOrWhiteSpace(routeName))
                 {
-                    var routeValueDictionary = new RouteValueDictionary(routeValues);
                     return TypedResults.CreatedAtRoute(result.Content, routeName, routeValues);
                 }
                 else if (result.Content is StreamFileContent streamFileContent)
