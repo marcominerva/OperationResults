@@ -30,9 +30,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\OperationResults\OperationResults.csproj" />
+        <PackageReference Include="OperationResultTools" Version="2.0.5" />
     </ItemGroup>
-
+    
     <ItemGroup>
         <None Include="..\..\Toolbox.png">
             <Pack>True</Pack>
