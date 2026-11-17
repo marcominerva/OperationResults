@@ -19,12 +19,14 @@ public static class ResultExtensions
     {
         ArgumentNullException.ThrowIfNull(mapper);
 
-        if (source.Success)
+        Result<TDestination> result = source switch
         {
-            return Result<TDestination>.Ok(mapper(source.Content));
-        }
+            TSource value => mapper(value),
+            Error error => new Error(error.FailureReason, error.ErrorMessage, error.ErrorDetail, error.Exception, error.ValidationErrors),
+            null => throw new InvalidOperationException("Unexpected result type.")
+        };
 
-        return new(false, default, source.FailureReason, source.ErrorMessage, source.ErrorDetail, source.Error, source.ValidationErrors);
+        return result;
     }
 
     /// <summary>
@@ -43,14 +45,13 @@ public static class ResultExtensions
     {
         ArgumentNullException.ThrowIfNull(mapper);
 
-        if (source.Success)
+        Result<PaginatedList<TDestination>> result = source switch
         {
-            var mappedItems = source.Content.Items?.Select(mapper);
-            var mappedList = new PaginatedList<TDestination>(mappedItems, source.Content.TotalCount, source.Content.PageIndex, source.Content.PageSize, source.Content.HasNextPage);
+            PaginatedList<TSource> content => new PaginatedList<TDestination>(content.Items?.Select(mapper), content.TotalCount, content.PageIndex, content.PageSize, content.HasNextPage),
+            Error error => new Error(error.FailureReason, error.ErrorMessage, error.ErrorDetail, error.Exception, error.ValidationErrors),
+            null => throw new InvalidOperationException("Unexpected result type.")
+        };
 
-            return Result<PaginatedList<TDestination>>.Ok(mappedList);
-        }
-
-        return new(false, default, source.FailureReason, source.ErrorMessage, source.ErrorDetail, source.Error, source.ValidationErrors);
+        return result;
     }
 }
