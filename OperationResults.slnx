@@ -24,4 +24,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/OperationResultsTests/OperationResultsTests.csproj" />
   </Folder>
+  <Project Path="tests/OperationResults.AspNetCore.HttpTests/OperationResults.AspNetCore.HttpTests.csproj" />
+  <Project Path="tests/OperationResults.AspNetCoreTests/OperationResults.AspNetCoreTests.csproj" />
 </Solution>

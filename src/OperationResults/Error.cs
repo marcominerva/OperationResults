@@ -2,7 +2,20 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace OperationResults;
 
-public class Error 
+/// <summary>
+/// Describes why an operation failed. It is the failure case of the <see cref="Result"/> and <see cref="Result{T}"/> unions.
+/// </summary>
+/// <remarks>
+/// Instances are created through the <c>Fail</c> factory methods of <see cref="Result"/> and <see cref="Result{T}"/>.
+/// Because <see cref="Error"/> converts implicitly to any result type, a failure can be propagated without copying its information:
+/// <code language="csharp">
+/// if (personResult is Error error)
+/// {
+///     return error;
+/// }
+/// </code>
+/// </remarks>
+public class Error
 {
     /// <summary>
     /// Gets the application-level failure code that explains unsuccessful operations and can be mapped by adapters to protocol-specific responses.

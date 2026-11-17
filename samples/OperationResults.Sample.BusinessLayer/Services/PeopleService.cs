@@ -49,15 +49,16 @@ public class PeopleService(ApplicationDbContext dbContext, IImageService imageSe
     {
         var personResult = await GetAsync(id);
 
-        if (!personResult) // A shortcut to !personResult.Success
+        if (personResult is Error error)
         {
-            return Result.Fail(personResult.FailureReason);
+            // Propagates the same failure: Error converts implicitly to any Result<T>.
+            return error;
         }
 
         var person = personResult.Content!;
 
         var imageResult = await imageService.GetImageAsync();
-        if (imageResult.TryGetContent(out var imageFileContent))
+        if (imageResult is ByteArrayFileContent imageFileContent)
         {
             // The image operation succeeded, return person with image
             var personWithImage = new PersonWithImage

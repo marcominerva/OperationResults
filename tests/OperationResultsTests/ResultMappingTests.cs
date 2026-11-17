@@ -7,7 +7,7 @@ public class ResultMappingTests
     [Fact]
     public void Map_SuccessResult_MapsContent()
     {
-        var mapped = Result<int>.Ok(42).Map(value => value.ToString());
+        var mapped = new Result<int>(42).Map(value => value.ToString());
 
         Assert.True(mapped.Success);
         Assert.Equal("42", mapped.Content);
@@ -18,7 +18,7 @@ public class ResultMappingTests
     {
         string? received = "value";
 
-        var mapped = Result<string?>.Ok(null).Map(value =>
+        var mapped = new Result<string?>((string?)null).Map(value =>
         {
             received = value;
             return value?.Length ?? -1;
@@ -31,7 +31,7 @@ public class ResultMappingTests
     [Fact]
     public void Map_MapperReturnsNull_ReturnsSuccessfulNullContent()
     {
-        var mapped = Result<int>.Ok(42).Map<int, string?>(_ => null);
+        var mapped = new Result<int>(42).Map<int, string?>(_ => null);
 
         Assert.True(mapped.Success);
         Assert.Null(mapped.Content);
@@ -81,16 +81,30 @@ public class ResultMappingTests
     {
         var error = new InvalidOperationException("mapping failed");
 
-        var thrown = Assert.Throws<InvalidOperationException>(() => Result<int>.Ok(42).Map<int, string>(_ => throw error));
+        var thrown = Assert.Throws<InvalidOperationException>(() => new Result<int>(42).Map<int, string>(_ => throw error));
 
         Assert.Same(error, thrown);
+    }
+
+    [Fact]
+    public void Map_DefaultResult_ThrowsInvalidOperationExceptionAndDoesNotCallMapper()
+    {
+        var mapperCalled = false;
+
+        Assert.Throws<InvalidOperationException>(() => default(Result<int>).Map(value =>
+        {
+            mapperCalled = true;
+            return value.ToString();
+        }));
+
+        Assert.False(mapperCalled);
     }
 
     [Fact]
     public void MapPaginated_Success_MapsEveryItemAndPreservesMetadata()
     {
         int[] items = [1, 2, 3];
-        var source = Result<PaginatedList<int>>.Ok(new(items, 10, 2, 3, true));
+        var source = new Result<PaginatedList<int>>(new PaginatedList<int>(items, 10, 2, 3, true));
         var received = new List<int>();
 
         var mapped = source.MapPaginated(value =>
@@ -112,7 +126,7 @@ public class ResultMappingTests
     [Fact]
     public void MapPaginated_NullItems_PreservesNullAndDoesNotCallMapper()
     {
-        var source = Result<PaginatedList<int>>.Ok(new(null, 10, 2, 3, true));
+        var source = new Result<PaginatedList<int>>(new PaginatedList<int>(null, 10, 2, 3, true));
         var mapperCalled = false;
 
         var mapped = source.MapPaginated(value =>
@@ -133,7 +147,7 @@ public class ResultMappingTests
     [Fact]
     public void MapPaginated_EmptyItems_RemainsEmptyAndDoesNotCallMapper()
     {
-        var source = Result<PaginatedList<int>>.Ok(new([], 0, 0, 25, false));
+        var source = new Result<PaginatedList<int>>(new PaginatedList<int>([], 0, 0, 25, false));
         var mapperCalled = false;
 
         var mapped = source.MapPaginated(value =>
@@ -191,7 +205,7 @@ public class ResultMappingTests
     public void MapPaginated_MapperThrows_PropagatesWhenItemsAreEnumerated()
     {
         var error = new InvalidOperationException("mapping failed");
-        var mapped = Result<PaginatedList<int>>.Ok(new([42])).MapPaginated<int, string>(_ => throw error);
+        var mapped = new Result<PaginatedList<int>>(new PaginatedList<int>([42])).MapPaginated<int, string>(_ => throw error);
 
         var thrown = Assert.Throws<InvalidOperationException>(() => mapped.Content!.Items!.ToList());
 
@@ -199,22 +213,35 @@ public class ResultMappingTests
     }
 
     [Fact]
-    public void MapPaginated_NullContent_ThrowsNullReferenceException()
+    public void MapPaginated_NullContent_ReturnsSuccessfulNullContentAndDoesNotCallMapper()
     {
-        var source = Result<PaginatedList<int>>.Ok(null);
+        var source = new Result<PaginatedList<int>>((PaginatedList<int>)null!);
+        var mapperCalled = false;
 
-        Assert.Throws<NullReferenceException>(() => source.MapPaginated(value => value.ToString()));
+        var mapped = source.MapPaginated(value =>
+        {
+            mapperCalled = true;
+            return value.ToString();
+        });
+
+        Assert.False(mapperCalled);
+        Assert.True(mapped.Success);
+        Assert.Null(mapped.Content);
+    }
+
+    [Fact]
+    public void MapPaginated_DefaultResult_ThrowsInvalidOperationException()
+    {
+        Assert.Throws<InvalidOperationException>(() => default(Result<PaginatedList<int>>).MapPaginated(value => value.ToString()));
     }
 
     private static void AssertFailureInformation<TSource, TDestination>(Result<TSource> source, Result<TDestination> mapped)
     {
+        var sourceError = Assert.IsType<Error>(source.Value);
+        var mappedError = Assert.IsType<Error>(mapped.Value);
+
         Assert.False(mapped.Success);
-        Assert.Null(mapped.Content);
-        Assert.Equal(source.FailureReason, mapped.FailureReason);
-        Assert.Equal(source.ErrorMessage, mapped.ErrorMessage);
-        Assert.Equal(source.ErrorDetail, mapped.ErrorDetail);
-        Assert.Same(source.Error, mapped.Error);
-        Assert.Same(source.ValidationErrors, mapped.ValidationErrors);
-        Assert.Equal(source.HasError, mapped.HasError);
+        Assert.Same(sourceError, mappedError);
+        Assert.Throws<InvalidOperationException>(() => mapped.Content);
     }
 }
