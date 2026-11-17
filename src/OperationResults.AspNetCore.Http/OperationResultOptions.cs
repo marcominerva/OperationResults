@@ -27,7 +27,8 @@ public class OperationResultOptions
     /// Gets or sets a value indicating whether failure reasons are translated through <see cref="StatusCodesMapping"/> before writing the HTTP response.
     /// </summary>
     /// <remarks>
-    /// Set this value to <see langword="false"/> when the application intentionally uses HTTP status codes directly as <see cref="Result.FailureReason"/> values.
+    /// Set this value to <see langword="false"/> when the application intentionally uses HTTP status codes directly as <see cref="Error.FailureReason"/> values.
+    /// A failed result without an <see cref="Error"/> (for example, <see langword="default"/> <see cref="Result"/>) is always mapped through <see cref="FailureReasons.GenericError"/>, because it has no failure reason to use as a status code.
     /// </remarks>
     public bool MapStatusCodes { get; set; } = true;
 

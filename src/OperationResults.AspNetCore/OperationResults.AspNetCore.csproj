@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+        <TargetFrameworks>net11.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <DocumentationFile>OperationResults.AspNetCore.xml</DocumentationFile>
@@ -29,8 +29,8 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
 
-    <ItemGroup>        
-        <PackageReference Include="OperationResultTools" Version="1.0.39" />
+    <ItemGroup>
+        <ProjectReference Include="..\OperationResults\OperationResults.csproj" />
     </ItemGroup>
 
     <ItemGroup>

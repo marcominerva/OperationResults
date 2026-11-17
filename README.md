@@ -17,6 +17,20 @@ The library is available on [NuGet](https://www.nuget.org/packages/OperationResu
 
     dotnet add package OperationResultTools
 
+> [!WARNING]
+> **Compatibility note:** version 2.0 requires **.NET 11** and **C# 15**. If your project targets .NET 10 or earlier, keep using version **1.x**.
+>
+> Starting from version 2.0, `Result` and `Result<T>` are [custom union types](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/union#custom-union-types), and this introduces breaking changes. Please see the [Upgrade Guide](#upgrade-guide) for more details.
+
+**Compatibility**
+
+| **Version** | **.NET**       | **C#** | **Notes**                                                   |
+|:------------|:---------------|:-------|:------------------------------------------------------------|
+| 2.x         | 11.0 or later  | 15     | `Result` and `Result<T>` are custom union types             |
+| 1.x         | 10.0, 9.0, 8.0 | -      | Use this version if your project targets .NET 10 or earlier |
+
+The same versioning applies to all the packages (`OperationResultTools`, `OperationResultTools.AspNetCore` and `OperationResultTools.AspNetCore.Http`).
+
 **Usage example**
 
 The core library can be used in your business layer to return successful or failed results without referencing ASP.NET Core types.
@@ -71,20 +85,49 @@ public class PeopleService(ApplicationDbContext dbContext, IImageService imageSe
 
 `Result<T>` can be returned directly from a value when the operation succeeds, and `Result.Fail` can be used when the operation needs to carry a failure reason, a message, and optional validation errors. This keeps application services focused on business outcomes instead of HTTP response types.
 
-You can also inspect a result without throwing exceptions:
+A non-generic `Result` converts implicitly to any `Result<T>`, so `Result.Fail(...)` can be returned from methods that return `Result<T>`. If you prefer to be explicit, `Result<T>.Fail(...)` exposes the same overloads. The conversion works as follows:
+
+| Source `Result` | Converted `Result<T>` |
+|---|---|
+| `Result.Fail(...)` | Failure with the same `Error` instance |
+| `Result.Ok()` | Success with `default(T)` content |
+| `new Result(false)` or `default(Result)` (which is the same) | `default(Result<T>)`: not successful and without an `Error` |
+
+A `Result<T>` is a union of `T` and `Error`, so you can inspect it with pattern matching:
 
 ```csharp
 var result = await peopleService.GetAsync(id);
 
-if (result.TryGetContent(out var person))
+if (result is Person person)
 {
     Console.WriteLine($"Loaded {person.FirstName} {person.LastName}");
 }
-else if (result.HasError)
+else if (result is Error error)
 {
-    Console.WriteLine(result.ErrorMessage);
+    Console.WriteLine(error.ErrorMessage);
 }
 ```
+
+An `Error` converts implicitly to any result type, so a failure can be propagated as is:
+
+```csharp
+var personResult = await GetAsync(id);
+if (personResult is Error error)
+{
+    return error;
+}
+```
+
+The `Success` property (also available through the `if (result)` shortcut) is based on an explicit discriminator, not on the content:
+
+| Result | `Success` | `Content` | Pattern that matches |
+|---|---|---|---|
+| Success with content (including `0` or `false`) | `true` | the content | `T` |
+| Success with `null` content | `true` | `null` | `null` |
+| Failure | `false` | throws `InvalidOperationException` | `Error` |
+| `default(Result<T>)` | `false` | `default(T)` | `null` |
+
+Because type patterns never match `null`, use `Success` when you need to tell a successful `null` content apart from an uninitialized result.
 
 The same pattern also works for file results or other payloads:
 
@@ -146,7 +189,7 @@ public class PeopleController(IPeopleService peopleService) : ControllerBase
     public async Task<IActionResult> Save(Person person)
     {
         var result = await peopleService.SaveAsync(person);
-        return HttpContext.CreateResponse(result, nameof(GetPerson), new { id = result.Content?.Id });
+        return HttpContext.CreateResponse(result, nameof(GetPerson), new { id = result is Person saved ? saved.Id : default(Guid?) });
     }
 
     [HttpDelete("{id:guid}")]
@@ -265,7 +308,7 @@ peopleApi.MapGet("{id:guid}", async (Guid id, IPeopleService peopleService, Http
 peopleApi.MapPost("/", async (Person person, IPeopleService peopleService, HttpContext httpContext) =>
 {
     var result = await peopleService.SaveAsync(person);
-    return httpContext.CreateResponse(result, "GetPerson", new { id = result.Content?.Id });
+    return httpContext.CreateResponse(result, "GetPerson", new { id = result is Person saved ? saved.Id : default(Guid?) });
 })
 .Produces<Person>(StatusCodes.Status201Created)
 .ProducesProblem(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json);
@@ -284,7 +327,7 @@ peopleApi.MapDelete("{id:guid}", async (Guid id, IPeopleService peopleService, H
 .Produces(StatusCodes.Status404NotFound);
 ```
 
-If a service returns content together with a failure, the adapter returns that content with the mapped failure status code instead of creating a problem details response. This is useful for partial results or domain-specific error payloads.
+A failed result is always translated to a problem details response built from its `Error`. A failed result without an `Error` (for example, a `default` instance) is treated as `FailureReasons.GenericError`.
 
 The same mechanism can also return files:
 
@@ -298,6 +341,119 @@ app.MapGet("api/image", async (IImageService imageService, HttpContext httpConte
 
 In this way, the business layer remains completely decoupled from ASP.NET Core, while the web layer consistently translates `Result` and `Result<T>` instances into HTTP responses.
 
+## Upgrade Guide
+
+### From 1.x to 2.0
+
+Version 2.0 rewrites `Result` and `Result<T>` as [custom union types](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/union#custom-union-types), a C# 15 feature. For this reason, **version 2.0 requires .NET 11 or later**, for both the core library and the ASP.NET Core integration libraries.
+
+> [!IMPORTANT]
+> If your project targets .NET 10 or earlier, you must stay on version 1.x, which continues to work as before:
+>
+> ```xml
+> <PackageReference Include="OperationResultTools" Version="1.*" />
+> <PackageReference Include="OperationResultTools.AspNetCore" Version="1.*" />
+> <PackageReference Include="OperationResultTools.AspNetCore.Http" Version="1.*" />
+> ```
+
+To upgrade, change the target framework of your projects to `net11.0`, update all the OperationResultTools packages to 2.0, and then apply the following changes.
+
+**`Result` and `Result<T>` are now structs**
+
+They are `readonly struct` union types: `Result<T>` is a union of `T` and `Error`, and `Result` is a union of `bool` and `Error`. As a consequence, they can't be `null`, and `default(Result<T>)` is a valid instance that is neither a success nor a failure with an `Error`. Code that checks a result for `null` must be removed.
+
+**Error information moved to the `Error` class**
+
+In 1.x, `FailureReason`, `ErrorMessage`, `ErrorDetail`, `ValidationErrors`, `HasError` and the `Error` property (the exception) were exposed directly by the result. In 2.0 they belong to the `Error` case of the union, which you get with pattern matching. The exception is now available through `Error.Exception`:
+
+```csharp
+// 1.x
+if (!result.Success)
+{
+    logger.LogError(result.Error, "Operation failed with reason {Reason}: {Message}", result.FailureReason, result.ErrorMessage);
+}
+
+// 2.0
+if (result is Error error)
+{
+    logger.LogError(error.Exception, "Operation failed with reason {Reason}: {Message}", error.FailureReason, error.ErrorMessage);
+}
+```
+
+**`Result<T>.Ok` has been removed**
+
+Return the value directly (it is converted implicitly), or use the constructor:
+
+```csharp
+// 1.x
+return Result<Person>.Ok(person);
+
+// 2.0
+return person;
+// or
+return new Result<Person>(person);
+```
+
+`Result.Ok()` is still available for the non-generic `Result`.
+
+**`TryGetContent` has been replaced by pattern matching**
+
+```csharp
+// 1.x
+if (result.TryGetContent(out var person))
+{
+    // ...
+}
+
+// 2.0
+if (result is Person person)
+{
+    // ...
+}
+```
+
+**`Content` throws on failure**
+
+In 1.x `Content` returned `default(T)` for a failed result. In 2.0 it throws an `InvalidOperationException` when the result contains an `Error`. Use pattern matching when the result may be a failure:
+
+```csharp
+// 1.x
+var id = result.Content?.Id;
+
+// 2.0
+var id = result is Person person ? person.Id : default(Guid?);
+```
+
+**`Success` is based on a discriminator**
+
+`Success` is `true` for every successful result, even when its content is `null`, `0` or `false`. Because type patterns never match `null`, use `Success` (or the `null` pattern) to handle a successful `null` content.
+
+**Failure content is no longer supported**
+
+The `Fail` overloads that accepted a `T content` argument have been removed, and the ASP.NET Core integration libraries no longer write content in failure responses. A failure is always translated to a problem details response built from its `Error`. If you need to return extra data, use the message, the detail or the validation errors.
+
+**Failures without an `Error` are mapped to `GenericError`**
+
+A result that is not successful and has no `Error` (for example, `default(Result<T>)` or `new Result(false)`) is translated to a `FailureReasons.GenericError` response (500 Internal Server Error by default). This mapping is applied even when `MapStatusCodes` is `false`, because such a result has no failure reason to use as an HTTP status code.
+
+**Changes to `Map` and `MapPaginated`**
+
+- `Map` and `MapPaginated` throw an `InvalidOperationException` when called on a `default` instance, because it represents neither a success nor a failure.
+- `MapPaginated` on a successful result with `null` content now returns a successful result with `null` content instead of a failure.
+
+**`PaginatedList<T>(items, totalCount, pageIndex)` has been removed**
+
+That constructor inferred the page size from the number of supplied items, so on a partial last page it computed wrong `PageSize` and `HasNextPage` values (for example, 7 items in pages of 3: the third page contains 1 item, and the constructor reported a page size of 1 and another page available). Pass the page size explicitly:
+
+```csharp
+// 1.x
+var page = new PaginatedList<Person>(people, totalCount, pageIndex);
+
+// 2.0
+var page = new PaginatedList<Person>(people, totalCount, pageIndex, pageSize);
+```
+
+The other constructors now also treat `null` items as an empty page in every case: in 1.x, `new PaginatedList<T>(null, totalCount)` always set `HasNextPage` to `false`, while an empty collection set it to `true` when `totalCount` was greater than zero.
 
 **Contribute**
 

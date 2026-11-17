@@ -12,6 +12,7 @@
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path="global.json" />
     <File Path="README.md" />
     <File Path="src/Directory.Build.props" />
   </Folder>
@@ -23,4 +24,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/OperationResultsTests/OperationResultsTests.csproj" />
   </Folder>
+  <Project Path="tests/OperationResults.AspNetCore.HttpTests/OperationResults.AspNetCore.HttpTests.csproj" />
+  <Project Path="tests/OperationResults.AspNetCoreTests/OperationResults.AspNetCoreTests.csproj" />
 </Solution>
