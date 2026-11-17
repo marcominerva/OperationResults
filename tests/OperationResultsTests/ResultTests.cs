@@ -102,6 +102,51 @@ public class ResultTests
     }
 
     [Fact]
+    public void GenericResult_ObjectContentThatIsError_IsFailure()
+    {
+        var error = Assert.IsType<Error>(Result<int>.Fail(FailureReasons.ItemNotFound).Value);
+
+        var result = new Result<object>((object)error);
+
+        Assert.False(result.Success);
+        Assert.Same(error, result.Value);
+        Assert.True(result.TryGetValue(out Error? matched));
+        Assert.Same(error, matched);
+        Assert.True(result is Error);
+        Assert.Throws<InvalidOperationException>(() => result.Content);
+    }
+
+    [Fact]
+    public void GenericResult_ObjectContentThatIsError_BehavesLikeErrorConstructor()
+    {
+        var error = Assert.IsType<Error>(Result<int>.Fail(FailureReasons.ItemNotFound).Value);
+
+        var fromObject = new Result<object>((object)error);
+        var fromError = new Result<object>(error);
+
+        Assert.Equal(fromError.Success, fromObject.Success);
+        Assert.Same(fromError.Value, fromObject.Value);
+    }
+
+    [Fact]
+    public void GenericResultOfObject_Failure_TryGetValueIsConsistentWithValue()
+    {
+        var result = Result<object>.Fail(FailureReasons.ItemNotFound);
+
+        Assert.True(result.Value is object);
+        Assert.True(result.TryGetValue(out object? value));
+        Assert.Same(result.Value, value);
+        Assert.IsType<Error>(value);
+    }
+
+    [Fact]
+    public void GenericResultOfObject_DefaultOrNullContent_TryGetValueReturnsFalse()
+    {
+        Assert.False(default(Result<object>).TryGetValue(out object? _));
+        Assert.False(new Result<object>((object)null!).TryGetValue(out object? _));
+    }
+
+    [Fact]
     public void GenericResult_NullError_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => new Result<int>((Error)null!));

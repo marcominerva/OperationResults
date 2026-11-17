@@ -52,10 +52,21 @@ public readonly struct Result<T> : IUnion
     /// <param name="content">
     /// The content produced by the operation. It can be <see langword="null"/> when <typeparamref name="T"/> allows it: the result is still successful.
     /// </param>
+    /// <remarks>
+    /// When <typeparamref name="T"/> is <see cref="object"/>, an <see cref="Error"/> passed as content creates a failed result, exactly like <see cref="Result{T}(Error)"/>.
+    /// This guarantees that an <see cref="Error"/> always represents a failure, so <see cref="Value"/>, <see cref="Success"/>, and pattern matching never disagree.
+    /// </remarks>
     public Result(T content)
     {
-        this.content = content;
-        Success = true;
+        if (content is Error error)
+        {
+            this.error = error;
+        }
+        else
+        {
+            this.content = content;
+            Success = true;
+        }
     }
 
     /// <summary>
@@ -106,13 +117,22 @@ public readonly struct Result<T> : IUnion
     /// Attempts to get the content of a successful operation without boxing it.
     /// </summary>
     /// <param name="value">When this method returns <see langword="true"/>, the content of the operation.</param>
-    /// <returns><see langword="true"/> when the operation succeeded with non-<see langword="null"/> content; otherwise, <see langword="false"/>.</returns>
+    /// <returns>
+    /// <see langword="true"/> when the operation succeeded with non-<see langword="null"/> content; otherwise, <see langword="false"/>.
+    /// When <typeparamref name="T"/> is <see cref="object"/>, it also returns <see langword="true"/> for a failed operation, delivering the <see cref="Error"/>, to stay consistent with <see cref="Value"/>.
+    /// </returns>
     /// <remarks>The compiler uses this member to evaluate type patterns on <typeparamref name="T"/>.</remarks>
     public bool TryGetValue([MaybeNullWhen(false)] out T value)
     {
         if (Success && content is not null)
         {
             value = content;
+            return true;
+        }
+
+        if (error is T errorValue)
+        {
+            value = errorValue;
             return true;
         }
 
