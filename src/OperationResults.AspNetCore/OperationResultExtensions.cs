@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Net.Mime;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.WebUtilities;
@@ -23,12 +24,11 @@ public static class OperationResultExtensions
     /// <returns>An <see cref="IActionResult"/> that represents the operation outcome.</returns>
     public static IActionResult ToResponse(this Result result, HttpContext httpContext, int? successStatusCode = null)
     {
-        if (result.Success)
+        return result switch
         {
-            return new StatusCodeResult(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent));
-        }
-
-        return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+            { Success: true } => new StatusCodeResult(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent)),
+            _ => Problem(httpContext, result is Error error ? error : null)
+        };
     }
 
     /// <summary>
@@ -42,17 +42,14 @@ public static class OperationResultExtensions
     /// <returns>An <see cref="IActionResult"/> that represents the operation outcome.</returns>
     public static IActionResult ToResponse(this Result result, HttpContext httpContext, string? routeName, object? routeValues = null, int? successStatusCode = null)
     {
-        if (result.Success)
+        return result switch
         {
-            var createdAtRouteResult = new CreatedAtRouteResult(routeName, routeValues, null)
+            { Success: true } => new CreatedAtRouteResult(routeName, routeValues, null)
             {
                 StatusCode = successStatusCode.GetValueOrDefault(StatusCodes.Status201Created)
-            };
-
-            return createdAtRouteResult;
-        }
-
-        return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+            },
+            _ => Problem(httpContext, result is Error error ? error : null)
+        };
     }
 
     /// <summary>
@@ -81,73 +78,43 @@ public static class OperationResultExtensions
     /// </remarks>
     public static IActionResult ToResponse<T>(this Result<T> result, HttpContext httpContext, string? routeName, object? routeValues = null, int? successStatusCode = null)
     {
-        if (result.Success)
+        return result switch
         {
-            if (result.Content is not null)
+            { Success: true, Content: not null } when !string.IsNullOrWhiteSpace(routeName) => new CreatedAtRouteResult(routeName, routeValues, result.Content)
             {
-                if (!string.IsNullOrWhiteSpace(routeName))
-                {
-                    var createdAtRouteResult = new CreatedAtRouteResult(routeName, routeValues, result.Content)
-                    {
-                        StatusCode = successStatusCode.GetValueOrDefault(StatusCodes.Status201Created)
-                    };
-
-                    return createdAtRouteResult;
-                }
-                else if (result.Content is StreamFileContent streamFileContent)
-                {
-                    var fileStreamResult = new FileStreamResult(streamFileContent.Content, streamFileContent.ContentType)
-                    {
-                        FileDownloadName = streamFileContent.DownloadFileName,
-                    };
-
-                    return fileStreamResult;
-                }
-                else if (result.Content is ByteArrayFileContent byteArrayFileContent)
-                {
-                    var fileContentResult = new FileContentResult(byteArrayFileContent.Content, byteArrayFileContent.ContentType)
-                    {
-                        FileDownloadName = byteArrayFileContent.DownloadFileName
-                    };
-
-                    return fileContentResult;
-                }
-
-                var okResult = new ObjectResult(result.Content)
-                {
-                    StatusCode = successStatusCode.GetValueOrDefault(StatusCodes.Status200OK)
-                };
-
-                return okResult;
-            }
-
-            return new StatusCodeResult(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent));
-        }
-
-        return Problem(httpContext, result.FailureReason, result.Content, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+                StatusCode = successStatusCode.GetValueOrDefault(StatusCodes.Status201Created)
+            },
+            { Success: true, Content: StreamFileContent streamFileContent } => new FileStreamResult(streamFileContent.Content, streamFileContent.ContentType)
+            {
+                FileDownloadName = streamFileContent.DownloadFileName,
+            },
+            { Success: true, Content: ByteArrayFileContent byteArrayFileContent } => new FileContentResult(byteArrayFileContent.Content, byteArrayFileContent.ContentType)
+            {
+                FileDownloadName = byteArrayFileContent.DownloadFileName
+            },
+            { Success: true, Content: not null } => new ObjectResult(result.Content)
+            {
+                StatusCode = successStatusCode.GetValueOrDefault(StatusCodes.Status200OK)
+            },
+            { Success: true } => new StatusCodeResult(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent)),
+            _ => Problem(httpContext, result is Error error ? error : null)
+        };
     }
 
-    private static IActionResult Problem(HttpContext httpContext, int failureReason, object? content = null, string? title = null, string? detail = null, IEnumerable<ValidationError>? validationErrors = null)
+    private static JsonResult Problem(HttpContext httpContext, Error? error)
     {
         var options = httpContext.RequestServices.GetService<OperationResultOptions>() ?? new OperationResultOptions();
-        var statusCode = options.MapStatusCodes ? options.GetStatusCode(failureReason) : failureReason;
 
-        if (content is not null)
-        {
-            var objectResult = new ObjectResult(content)
-            {
-                StatusCode = statusCode
-            };
-
-            return objectResult;
-        }
+        // A failed result without an Error comes from Result(false) (which is also the default Result) or from a default Result<T>: it has no reason, so it is treated as a generic failure.
+        // This synthetic reason is not an HTTP status code, so it is always mapped, even when MapStatusCodes is disabled.
+        var failureReason = error?.FailureReason ?? FailureReasons.GenericError;
+        var statusCode = error is null || options.MapStatusCodes ? options.GetStatusCode(failureReason) : failureReason;
 
         var problemDetailsFactory = httpContext.RequestServices.GetRequiredService<ProblemDetailsFactory>();
-        var problemDetails = problemDetailsFactory.CreateProblemDetails(httpContext, statusCode, title ?? ReasonPhrases.GetReasonPhrase(statusCode),
-            detail: detail, instance: httpContext.Request.Path);
+        var problemDetails = problemDetailsFactory.CreateProblemDetails(httpContext, statusCode, error?.ErrorMessage ?? ReasonPhrases.GetReasonPhrase(statusCode), detail: error?.ErrorDetail, instance: httpContext.Request.Path);
         problemDetails.Type ??= $"https://httpstatuses.io/{statusCode}";
 
-        if (validationErrors?.Any() ?? false)
+        if (error?.ValidationErrors is { } validationErrors && validationErrors.Any())
         {
             if (options.ErrorResponseFormat == ErrorResponseFormat.Default)
             {
@@ -163,7 +130,7 @@ public static class OperationResultExtensions
         var problemDetailsResult = new JsonResult(problemDetails)
         {
             StatusCode = statusCode,
-            ContentType = "application/problem+json"
+            ContentType = MediaTypeNames.Application.ProblemJson
         };
 
         return problemDetailsResult;

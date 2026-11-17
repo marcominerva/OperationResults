@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using System.Text.Json;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,12 +24,11 @@ public static class OperationResultExtensions
     /// <returns>An <see cref="IResult"/> that represents the operation outcome.</returns>
     public static IResult ToResponse(this Result result, HttpContext httpContext, int? successStatusCode = null)
     {
-        if (result.Success)
+        return result switch
         {
-            return TypedResults.StatusCode(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent));
-        }
-
-        return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+            { Success: true } => TypedResults.StatusCode(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent)),
+            _ => Problem(httpContext, result is Error error ? error : null)
+        };
     }
 
     /// <summary>
@@ -43,12 +42,11 @@ public static class OperationResultExtensions
     /// <returns>An <see cref="IResult"/> that represents the operation outcome.</returns>
     public static IResult ToResponse(this Result result, HttpContext httpContext, string? routeName, object? routeValues = null)
     {
-        if (result.Success)
+        return result switch
         {
-            return TypedResults.CreatedAtRoute(routeName, routeValues);
-        }
-
-        return Problem(httpContext, result.FailureReason, null, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+            { Success: true } => TypedResults.CreatedAtRoute(routeName, routeValues),
+            _ => Problem(httpContext, result is Error error ? error : null)
+        };
     }
 
     /// <summary>
@@ -77,53 +75,37 @@ public static class OperationResultExtensions
     /// </remarks>
     public static IResult ToResponse<T>(this Result<T> result, HttpContext httpContext, string? routeName, object? routeValues = null, int? successStatusCode = null)
     {
-        if (result.Success)
+        return result switch
         {
-            if (result.Content is not null)
-            {
-                if (!string.IsNullOrWhiteSpace(routeName))
-                {
-                    return TypedResults.CreatedAtRoute(result.Content, routeName, routeValues);
-                }
-                else if (result.Content is StreamFileContent streamFileContent)
-                {
-                    return TypedResults.Stream(streamFileContent.Content, streamFileContent.ContentType, streamFileContent.DownloadFileName);
-                }
-                else if (result.Content is ByteArrayFileContent byteArrayFileContent)
-                {
-                    return TypedResults.File(byteArrayFileContent.Content, byteArrayFileContent.ContentType, byteArrayFileContent.DownloadFileName);
-                }
-
-                return TypedResults.Json(result.Content, statusCode: successStatusCode.GetValueOrDefault(StatusCodes.Status200OK));
-            }
-
-            return TypedResults.StatusCode(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent));
-        }
-
-        return Problem(httpContext, result.FailureReason, result.Content, result.ErrorMessage, result.ErrorDetail, result.ValidationErrors);
+            { Success: true, Content: not null } when !string.IsNullOrWhiteSpace(routeName) => TypedResults.CreatedAtRoute(result.Content, routeName, routeValues),
+            { Success: true, Content: StreamFileContent streamFileContent } => TypedResults.Stream(streamFileContent.Content, streamFileContent.ContentType, streamFileContent.DownloadFileName),
+            { Success: true, Content: ByteArrayFileContent byteArrayFileContent } => TypedResults.File(byteArrayFileContent.Content, byteArrayFileContent.ContentType, byteArrayFileContent.DownloadFileName),
+            { Success: true, Content: not null } => TypedResults.Json(result.Content, statusCode: successStatusCode.GetValueOrDefault(StatusCodes.Status200OK)),
+            { Success: true } => TypedResults.StatusCode(successStatusCode.GetValueOrDefault(StatusCodes.Status204NoContent)),
+            _ => Problem(httpContext, result is Error error ? error : null)
+        };
     }
 
-    private static IResult Problem(HttpContext httpContext, int failureReason, object? content = null, string? title = null, string? detail = null, IEnumerable<ValidationError>? validationErrors = null)
+    private static ProblemHttpResult Problem(HttpContext httpContext, Error? error)
     {
         var options = httpContext.RequestServices.GetService<OperationResultOptions>() ?? new OperationResultOptions();
-        var statusCode = options.MapStatusCodes ? options.GetStatusCode(failureReason) : failureReason;
 
-        if (HasValidContent(content))
-        {
-            return TypedResults.Json(content, statusCode: statusCode);
-        }
+        // A failed result without an Error comes from Result(false) (which is also the default Result) or from a default Result<T>: it has no reason, so it is treated as a generic failure.
+        // This synthetic reason is not an HTTP status code, so it is always mapped, even when MapStatusCodes is disabled.
+        var failureReason = error?.FailureReason ?? FailureReasons.GenericError;
+        var statusCode = error is null || options.MapStatusCodes ? options.GetStatusCode(failureReason) : failureReason;
 
         var problemDetails = new ProblemDetails
         {
             Status = statusCode,
-            Title = title ?? ReasonPhrases.GetReasonPhrase(statusCode),
-            Detail = detail,
+            Title = error?.ErrorMessage ?? ReasonPhrases.GetReasonPhrase(statusCode),
+            Detail = error?.ErrorDetail,
             Instance = httpContext.Request.Path
         };
 
         problemDetails.Extensions.Add("traceId", Activity.Current?.Id ?? httpContext.TraceIdentifier);
 
-        if (validationErrors?.Any() ?? false)
+        if (error?.ValidationErrors is { } validationErrors && validationErrors.Any())
         {
             if (options.ErrorResponseFormat == ErrorResponseFormat.Default)
             {
@@ -141,12 +123,4 @@ public static class OperationResultExtensions
 
         return problemResult;
     }
-
-    private static bool HasValidContent(object? content)
-        => content switch
-        {
-            null => false,
-            JsonElement { ValueKind: JsonValueKind.Undefined } => false,
-            _ => true
-        };
 }
