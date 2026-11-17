@@ -106,8 +106,9 @@ public static class OperationResultExtensions
         var options = httpContext.RequestServices.GetService<OperationResultOptions>() ?? new OperationResultOptions();
 
         // A failed result without an Error comes from Result(false) (which is also the default Result) or from a default Result<T>: it has no reason, so it is treated as a generic failure.
+        // This synthetic reason is not an HTTP status code, so it is always mapped, even when MapStatusCodes is disabled.
         var failureReason = error?.FailureReason ?? FailureReasons.GenericError;
-        var statusCode = options.MapStatusCodes ? options.GetStatusCode(failureReason) : failureReason;
+        var statusCode = error is null || options.MapStatusCodes ? options.GetStatusCode(failureReason) : failureReason;
 
         var problemDetailsFactory = httpContext.RequestServices.GetRequiredService<ProblemDetailsFactory>();
         var problemDetails = problemDetailsFactory.CreateProblemDetails(httpContext, statusCode, error?.ErrorMessage ?? ReasonPhrases.GetReasonPhrase(statusCode), detail: error?.ErrorDetail, instance: httpContext.Request.Path);

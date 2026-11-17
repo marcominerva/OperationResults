@@ -286,6 +286,30 @@ public class MinimalApiResponseTests
     }
 
     [Fact]
+    public void CreateResponse_FailedResultWithoutErrorAndMapStatusCodesDisabled_ReturnsGenericError()
+    {
+        var httpContext = CreateHttpContext(options => options.MapStatusCodes = false);
+
+        AssertProblem(httpContext.CreateResponse(default), StatusCodes.Status500InternalServerError);
+        AssertProblem(httpContext.CreateResponse(new Result(false)), StatusCodes.Status500InternalServerError);
+        AssertProblem(httpContext.CreateResponse(default(Result<Person>)), StatusCodes.Status500InternalServerError);
+    }
+
+    [Fact]
+    public void CreateResponse_FailedResultWithoutErrorAndMapStatusCodesDisabled_UsesGenericErrorMapping()
+    {
+        var httpContext = CreateHttpContext(options =>
+        {
+            options.MapStatusCodes = false;
+            options.StatusCodesMapping[FailureReasons.GenericError] = StatusCodes.Status503ServiceUnavailable;
+        });
+
+        var response = httpContext.CreateResponse(new Result(false));
+
+        AssertProblem(response, StatusCodes.Status503ServiceUnavailable);
+    }
+
+    [Fact]
     public void ToResponse_OptionsNotRegistered_UsesDefaultMapping()
     {
         var httpContext = new DefaultHttpContext { RequestServices = new ServiceCollection().BuildServiceProvider() };

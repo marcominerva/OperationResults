@@ -434,7 +434,7 @@ The `Fail` overloads that accepted a `T content` argument have been removed, and
 
 **Failures without an `Error` are mapped to `GenericError`**
 
-A result that is not successful and has no `Error` (for example, `default(Result<T>)` or `new Result(false)`) is translated to a `FailureReasons.GenericError` response (500 Internal Server Error by default).
+A result that is not successful and has no `Error` (for example, `default(Result<T>)` or `new Result(false)`) is translated to a `FailureReasons.GenericError` response (500 Internal Server Error by default). This mapping is applied even when `MapStatusCodes` is `false`, because such a result has no failure reason to use as an HTTP status code.
 
 **Changes to `Map` and `MapPaginated`**
 
